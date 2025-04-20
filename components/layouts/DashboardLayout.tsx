@@ -21,7 +21,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { Menu, User, LogOut, BarChart, Package, Truck, Settings, Users, FileText } from 'lucide-react';
+import { Menu, User, LogOut, BarChart, Package, Truck, Settings, Users, FileText, Code } from 'lucide-react';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -63,6 +63,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       href: '/reports',
       icon: FileText,
       permission: 'report:generate'
+    },
+    {
+      name: 'API Documentation',
+      href: '/api-docs',
+      icon: Code,
+      permission: 'manage:users' // Only admins and managers can access API docs
     },
     {
       name: 'Settings',
