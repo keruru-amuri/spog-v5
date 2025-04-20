@@ -1,6 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import { PermissionGuard } from "@/components/auth/PermissionGuard"
+import { DashboardLayout } from "@/components/layouts/DashboardLayout"
 import Link from "next/link"
 import { ArrowLeft, BarChart3, Download, TrendingUp, AlertTriangle, MapPin, Package } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
@@ -186,38 +188,37 @@ export default function ReportsPage() {
   const mostUsedCategory = Object.keys(categoryUsage).reduce((a, b) => (categoryUsage[a] > categoryUsage[b] ? a : b))
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-10 border-b bg-background">
-        <div className="flex h-16 items-center px-4 md:px-6">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            <span className="text-sm font-medium">Back to Dashboard</span>
-          </Link>
-          <div className="ml-auto flex items-center gap-2">
-            <Select value={timeRange} onValueChange={setTimeRange}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select time range" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="30days">Last 30 Days</SelectItem>
-                <SelectItem value="3months">Last 3 Months</SelectItem>
-                <SelectItem value="6months">Last 6 Months</SelectItem>
-                <SelectItem value="1year">Last Year</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline" size="sm" className="gap-1">
-              <Download className="h-4 w-4" />
-              <span>Export</span>
-            </Button>
+    <DashboardLayout>
+      <PermissionGuard
+        permission="report:generate"
+        fallbackUrl="/dashboard"
+      >
+        <div className="container mx-auto p-6">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h1 className="text-3xl font-bold">Inventory Reports</h1>
+              <p className="text-muted-foreground">Analyze your inventory data and identify trends</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Select value={timeRange} onValueChange={setTimeRange}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Select time range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="30days">Last 30 Days</SelectItem>
+                  <SelectItem value="3months">Last 3 Months</SelectItem>
+                  <SelectItem value="6months">Last 6 Months</SelectItem>
+                  <SelectItem value="1year">Last Year</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button variant="outline" size="sm" className="gap-1">
+                <Download className="h-4 w-4" />
+                <span>Export</span>
+              </Button>
+            </div>
           </div>
-        </div>
-      </header>
-      <main className="flex-1 p-4 md:p-6">
+      <main className="flex-1">
         <div className="space-y-6">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Inventory Reports</h1>
-            <p className="text-muted-foreground">Analyze your inventory data and identify trends</p>
-          </div>
 
           {/* Summary Cards */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -830,6 +831,8 @@ export default function ReportsPage() {
           </Tabs>
         </div>
       </main>
-    </div>
+        </div>
+      </PermissionGuard>
+    </DashboardLayout>
   )
 }

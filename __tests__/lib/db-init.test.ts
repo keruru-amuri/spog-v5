@@ -1,12 +1,13 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { initializeDatabase, checkDatabaseHealth } from '../../lib/db-init';
 import { connectionManager } from '../../lib/supabase';
 
 // Mock the connection manager
-jest.mock('../../lib/supabase', () => {
+vi.mock('../../lib/supabase', () => {
   return {
     connectionManager: {
-      initialize: jest.fn(),
-      healthCheck: jest.fn(),
+      initialize: vi.fn(),
+      healthCheck: vi.fn(),
     },
   };
 });
@@ -17,9 +18,9 @@ const originalConsoleError = console.error;
 
 describe('Database Initialization', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    console.log = jest.fn();
-    console.error = jest.fn();
+    vi.clearAllMocks();
+    console.log = vi.fn();
+    console.error = vi.fn();
   });
 
   afterEach(() => {
@@ -29,7 +30,7 @@ describe('Database Initialization', () => {
 
   describe('initializeDatabase', () => {
     it('should initialize the database connection successfully', () => {
-      (connectionManager.initialize as jest.Mock).mockImplementation(() => {});
+      vi.mocked(connectionManager.initialize).mockImplementation(() => {});
 
       initializeDatabase();
 
@@ -39,7 +40,7 @@ describe('Database Initialization', () => {
 
     it('should handle initialization errors', () => {
       const mockError = new Error('Initialization error');
-      (connectionManager.initialize as jest.Mock).mockImplementation(() => {
+      vi.mocked(connectionManager.initialize).mockImplementation(() => {
         throw mockError;
       });
 
@@ -51,7 +52,7 @@ describe('Database Initialization', () => {
 
   describe('checkDatabaseHealth', () => {
     it('should return true when the database is healthy', async () => {
-      (connectionManager.healthCheck as jest.Mock).mockResolvedValue(true);
+      vi.mocked(connectionManager.healthCheck).mockResolvedValue(true);
 
       const isHealthy = await checkDatabaseHealth();
 
@@ -61,7 +62,7 @@ describe('Database Initialization', () => {
     });
 
     it('should return false when the database is unhealthy', async () => {
-      (connectionManager.healthCheck as jest.Mock).mockResolvedValue(false);
+      vi.mocked(connectionManager.healthCheck).mockResolvedValue(false);
 
       const isHealthy = await checkDatabaseHealth();
 
@@ -72,7 +73,7 @@ describe('Database Initialization', () => {
 
     it('should handle health check errors', async () => {
       const mockError = new Error('Health check error');
-      (connectionManager.healthCheck as jest.Mock).mockRejectedValue(mockError);
+      vi.mocked(connectionManager.healthCheck).mockRejectedValue(mockError);
 
       const isHealthy = await checkDatabaseHealth();
 

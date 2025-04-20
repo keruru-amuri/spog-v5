@@ -1,27 +1,28 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { supabase } from '@/lib/supabase';
 import { Database } from '@/types/supabase';
 
 // Mock Supabase client with more detailed functionality
-jest.mock('@/lib/supabase', () => {
+vi.mock('@/lib/supabase', () => {
   const mockError = { code: '', message: '', details: '' };
-  const mockFrom = jest.fn().mockReturnThis();
-  const mockSelect = jest.fn().mockReturnThis();
-  const mockInsert = jest.fn().mockReturnThis();
-  const mockUpdate = jest.fn().mockReturnThis();
-  const mockDelete = jest.fn().mockReturnThis();
-  const mockEq = jest.fn().mockReturnThis();
-  const mockSingle = jest.fn().mockReturnThis();
-  const mockIn = jest.fn().mockReturnThis();
-  const mockMatch = jest.fn().mockReturnThis();
-  const mockGt = jest.fn().mockReturnThis();
-  const mockLt = jest.fn().mockReturnThis();
-  const mockGte = jest.fn().mockReturnThis();
-  const mockLte = jest.fn().mockReturnThis();
-  const mockIs = jest.fn().mockReturnThis();
-  const mockNot = jest.fn().mockReturnThis();
+  const mockFrom = vi.fn().mockReturnThis();
+  const mockSelect = vi.fn().mockReturnThis();
+  const mockInsert = vi.fn().mockReturnThis();
+  const mockUpdate = vi.fn().mockReturnThis();
+  const mockDelete = vi.fn().mockReturnThis();
+  const mockEq = vi.fn().mockReturnThis();
+  const mockSingle = vi.fn().mockReturnThis();
+  const mockIn = vi.fn().mockReturnThis();
+  const mockMatch = vi.fn().mockReturnThis();
+  const mockGt = vi.fn().mockReturnThis();
+  const mockLt = vi.fn().mockReturnThis();
+  const mockGte = vi.fn().mockReturnThis();
+  const mockLte = vi.fn().mockReturnThis();
+  const mockIs = vi.fn().mockReturnThis();
+  const mockNot = vi.fn().mockReturnThis();
 
   // Default success response
-  const mockThen = jest.fn().mockImplementation(callback => {
+  const mockThen = vi.fn().mockImplementation(callback => {
     return callback({ data: [], error: null });
   });
 
@@ -67,7 +68,7 @@ jest.mock('@/lib/supabase', () => {
 describe('Inventory Item Schema', () => {
   // Reset mocks before each test
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Type Validation Tests', () => {

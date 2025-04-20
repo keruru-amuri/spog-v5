@@ -1,17 +1,18 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { supabase } from '@/lib/supabase';
 import { Database } from '@/types/supabase';
 
 // Mock Supabase client with more detailed functionality
-jest.mock('@/lib/supabase', () => {
+vi.mock('@/lib/supabase', () => {
   const mockError = { code: '', message: '', details: '' };
-  const mockFrom = jest.fn().mockReturnThis();
-  const mockSelect = jest.fn().mockReturnThis();
-  const mockInsert = jest.fn().mockReturnThis();
-  const mockUpdate = jest.fn().mockReturnThis();
-  const mockDelete = jest.fn().mockReturnThis();
-  
+  const mockFrom = vi.fn().mockReturnThis();
+  const mockSelect = vi.fn().mockReturnThis();
+  const mockInsert = vi.fn().mockReturnThis();
+  const mockUpdate = vi.fn().mockReturnThis();
+  const mockDelete = vi.fn().mockReturnThis();
+
   // Default success response
-  const mockThen = jest.fn().mockImplementation(callback => {
+  const mockThen = vi.fn().mockImplementation(callback => {
     return callback({ data: [], error: null });
   });
 
@@ -47,7 +48,7 @@ jest.mock('@/lib/supabase', () => {
 describe('Location Schema', () => {
   // Reset mocks before each test
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Type Validation Tests', () => {
@@ -84,7 +85,7 @@ describe('Location Schema', () => {
       (supabase as any).__simulateError({
         code: '23502',
         message: 'null value in column "name" violates not-null constraint',
-        details: 'Failing row contains (null, ...)'  
+        details: 'Failing row contains (null, ...)'
       });
 
       const result = await supabase.from('locations').insert(invalidLocation as any);
@@ -102,15 +103,15 @@ describe('Location Schema', () => {
 
       // Mock a successful location insert with a returned ID
       (supabase as any).__resetMocks();
-      (supabase.then as jest.Mock).mockImplementationOnce(callback => {
-        return callback({ 
-          data: [{ id: '123e4567-e89b-12d3-a456-426614174000', name: 'Storage Room A' }], 
-          error: null 
+      vi.mocked(supabase.then).mockImplementationOnce(callback => {
+        return callback({
+          data: [{ id: '123e4567-e89b-12d3-a456-426614174000', name: 'Storage Room A' }],
+          error: null
         });
       });
 
       const locationResult = await supabase.from('locations').insert(location);
-      
+
       // Now create an inventory item that references this location
       const inventoryItem: Database['public']['Tables']['inventory_items']['Insert'] = {
         name: 'Item in Storage Room A',

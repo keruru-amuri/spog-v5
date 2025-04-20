@@ -57,6 +57,14 @@ export interface PasswordUpdateRequest {
   password: string;
 }
 
+// Profile update request type
+export interface ProfileUpdateRequest {
+  firstName?: string;
+  lastName?: string;
+  department?: string;
+  profileImageUrl?: string;
+}
+
 // Authentication response types
 export interface AuthResponse {
   user: UserProfile;
@@ -71,21 +79,22 @@ export const PERMISSIONS = {
   USER_READ: 'user:read',
   USER_UPDATE: 'user:update',
   USER_DELETE: 'user:delete',
-  
+  USER_MANAGE: 'manage:users',
+
   // Inventory permissions
   INVENTORY_CREATE: 'inventory:create',
   INVENTORY_READ: 'inventory:read',
   INVENTORY_UPDATE: 'inventory:update',
   INVENTORY_DELETE: 'inventory:delete',
-  
+
   // Consumption permissions
   CONSUMPTION_CREATE: 'consumption:create',
   CONSUMPTION_READ: 'consumption:read',
-  
+
   // Report permissions
   REPORT_GENERATE: 'report:generate',
   REPORT_EXPORT: 'report:export',
-  
+
   // Location permissions
   LOCATION_CREATE: 'location:create',
   LOCATION_READ: 'location:read',

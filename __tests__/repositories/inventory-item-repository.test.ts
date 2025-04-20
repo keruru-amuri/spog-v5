@@ -1,41 +1,42 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { InventoryItemRepository } from '../../repositories/inventory-item-repository';
 import { connectionManager } from '../../lib/supabase';
 import { Database } from '../../types/supabase';
 
 // Mock the connection manager
-jest.mock('../../lib/supabase', () => {
+vi.mock('../../lib/supabase', () => {
   return {
     connectionManager: {
-      executeWithRetry: jest.fn(),
-      getClient: jest.fn().mockReturnValue({
-        from: jest.fn().mockReturnThis(),
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        not: jest.fn().mockReturnThis(),
-        is: jest.fn().mockReturnThis(),
-        lte: jest.fn().mockReturnThis(),
-        gte: jest.fn().mockReturnThis(),
-        limit: jest.fn().mockReturnThis(),
-        range: jest.fn().mockReturnThis(),
-        order: jest.fn().mockReturnThis(),
-        single: jest.fn().mockReturnThis(),
-        insert: jest.fn().mockReturnThis(),
-        update: jest.fn().mockReturnThis(),
-        delete: jest.fn().mockReturnThis(),
-        raw: jest.fn().mockReturnValue('minimum_quantity'),
+      executeWithRetry: vi.fn(),
+      getClient: vi.fn().mockReturnValue({
+        from: vi.fn().mockReturnThis(),
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        not: vi.fn().mockReturnThis(),
+        is: vi.fn().mockReturnThis(),
+        lte: vi.fn().mockReturnThis(),
+        gte: vi.fn().mockReturnThis(),
+        limit: vi.fn().mockReturnThis(),
+        range: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnThis(),
+        single: vi.fn().mockReturnThis(),
+        insert: vi.fn().mockReturnThis(),
+        update: vi.fn().mockReturnThis(),
+        delete: vi.fn().mockReturnThis(),
+        raw: vi.fn().mockReturnValue('minimum_quantity'),
       }),
     },
   };
 });
 
 // Mock the db-utils
-jest.mock('../../lib/db-utils', () => {
+vi.mock('../../lib/db-utils', () => {
   return {
-    fetchById: jest.fn(),
-    fetchMany: jest.fn(),
-    insert: jest.fn(),
-    update: jest.fn(),
-    remove: jest.fn(),
+    fetchById: vi.fn(),
+    fetchMany: vi.fn(),
+    insert: vi.fn(),
+    update: vi.fn(),
+    remove: vi.fn(),
   };
 });
 
@@ -47,13 +48,13 @@ describe('InventoryItemRepository', () => {
 
   beforeEach(() => {
     repository = new InventoryItemRepository();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('findById', () => {
     it('should call fetchById with the correct parameters', async () => {
       const mockItem = { id: '123', name: 'Test Item' };
-      (fetchById as jest.Mock).mockResolvedValueOnce({ data: mockItem, error: null, success: true });
+      vi.mocked(fetchById).mockResolvedValueOnce({ data: mockItem, error: null, success: true });
 
       const result = await repository.findById('123');
 
@@ -62,7 +63,7 @@ describe('InventoryItemRepository', () => {
     });
 
     it('should return null if the item is not found', async () => {
-      (fetchById as jest.Mock).mockResolvedValueOnce({ data: null, error: null, success: false });
+      vi.mocked(fetchById).mockResolvedValueOnce({ data: null, error: null, success: false });
 
       const result = await repository.findById('123');
 
@@ -76,7 +77,7 @@ describe('InventoryItemRepository', () => {
         { id: '123', name: 'Item 1' },
         { id: '456', name: 'Item 2' },
       ];
-      (fetchMany as jest.Mock).mockResolvedValueOnce({ data: mockItems, error: null, success: true });
+      vi.mocked(fetchMany).mockResolvedValueOnce({ data: mockItems, error: null, success: true });
 
       const result = await repository.findAll({ limit: 10 });
 
@@ -85,7 +86,7 @@ describe('InventoryItemRepository', () => {
     });
 
     it('should return an empty array if no items are found', async () => {
-      (fetchMany as jest.Mock).mockResolvedValueOnce({ data: null, error: null, success: false });
+      vi.mocked(fetchMany).mockResolvedValueOnce({ data: null, error: null, success: false });
 
       const result = await repository.findAll();
 
@@ -99,7 +100,7 @@ describe('InventoryItemRepository', () => {
         { id: '123', name: 'Item 1', category: 'electronics' },
         { id: '456', name: 'Item 2', category: 'electronics' },
       ];
-      (fetchMany as jest.Mock).mockResolvedValueOnce({ data: mockItems, error: null, success: true });
+      vi.mocked(fetchMany).mockResolvedValueOnce({ data: mockItems, error: null, success: true });
 
       const result = await repository.findBy({ category: 'electronics' }, { limit: 10 });
 
@@ -114,7 +115,7 @@ describe('InventoryItemRepository', () => {
   describe('create', () => {
     it('should call insert with the correct parameters', async () => {
       const mockItem = { id: '123', name: 'New Item', category: 'electronics' };
-      (insert as jest.Mock).mockResolvedValueOnce({ data: mockItem, error: null, success: true });
+      vi.mocked(insert).mockResolvedValueOnce({ data: mockItem, error: null, success: true });
 
       const result = await repository.create({ name: 'New Item', category: 'electronics' } as any);
 
@@ -123,7 +124,7 @@ describe('InventoryItemRepository', () => {
     });
 
     it('should throw an error if the item could not be created', async () => {
-      (insert as jest.Mock).mockResolvedValueOnce({ data: null, error: new Error('Database error'), success: false });
+      vi.mocked(insert).mockResolvedValueOnce({ data: null, error: new Error('Database error'), success: false });
 
       await expect(repository.create({ name: 'New Item', category: 'electronics' } as any)).rejects.toThrow('Failed to create inventory item');
     });
@@ -132,7 +133,7 @@ describe('InventoryItemRepository', () => {
   describe('update', () => {
     it('should call update with the correct parameters', async () => {
       const mockItem = { id: '123', name: 'Updated Item', category: 'electronics' };
-      (update as jest.Mock).mockResolvedValueOnce({ data: mockItem, error: null, success: true });
+      vi.mocked(update).mockResolvedValueOnce({ data: mockItem, error: null, success: true });
 
       const result = await repository.update('123', { name: 'Updated Item' } as any);
 
@@ -141,7 +142,7 @@ describe('InventoryItemRepository', () => {
     });
 
     it('should throw an error if the item could not be updated', async () => {
-      (update as jest.Mock).mockResolvedValueOnce({ data: null, error: new Error('Database error'), success: false });
+      vi.mocked(update).mockResolvedValueOnce({ data: null, error: new Error('Database error'), success: false });
 
       await expect(repository.update('123', { name: 'Updated Item' } as any)).rejects.toThrow('Inventory item with ID 123 not found');
     });
@@ -149,7 +150,7 @@ describe('InventoryItemRepository', () => {
 
   describe('delete', () => {
     it('should call remove with the correct parameters', async () => {
-      (remove as jest.Mock).mockResolvedValueOnce({ data: null, error: null, success: true });
+      vi.mocked(remove).mockResolvedValueOnce({ data: null, error: null, success: true });
 
       const result = await repository.delete('123');
 
@@ -158,7 +159,7 @@ describe('InventoryItemRepository', () => {
     });
 
     it('should return false if the item could not be deleted', async () => {
-      (remove as jest.Mock).mockResolvedValueOnce({ data: null, error: new Error('Database error'), success: false });
+      vi.mocked(remove).mockResolvedValueOnce({ data: null, error: new Error('Database error'), success: false });
 
       const result = await repository.delete('123');
 
@@ -172,7 +173,7 @@ describe('InventoryItemRepository', () => {
 
       // Mock the repository's count method
       const originalCount = repository.count;
-      repository.count = jest.fn().mockResolvedValue(5);
+      repository.count = vi.fn().mockResolvedValue(5);
 
       const result = await repository.count({ category: 'electronics' });
 
@@ -188,7 +189,7 @@ describe('InventoryItemRepository', () => {
 
       // Mock the query chain with an error
       mockClient.from.mockReturnValue({
-        select: jest.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
           count: null,
           error: new Error('Database error'),
         }),
@@ -206,7 +207,7 @@ describe('InventoryItemRepository', () => {
         { id: '123', name: 'Item 1', location_id: 'loc-123' },
         { id: '456', name: 'Item 2', location_id: 'loc-123' },
       ];
-      (fetchMany as jest.Mock).mockResolvedValueOnce({ data: mockItems, error: null, success: true });
+      vi.mocked(fetchMany).mockResolvedValueOnce({ data: mockItems, error: null, success: true });
 
       const result = await repository.findByLocation('loc-123', { limit: 10 });
 
@@ -224,7 +225,7 @@ describe('InventoryItemRepository', () => {
         { id: '123', name: 'Item 1', category: 'electronics' },
         { id: '456', name: 'Item 2', category: 'electronics' },
       ];
-      (fetchMany as jest.Mock).mockResolvedValueOnce({ data: mockItems, error: null, success: true });
+      vi.mocked(fetchMany).mockResolvedValueOnce({ data: mockItems, error: null, success: true });
 
       const result = await repository.findByCategory('electronics', { limit: 10 });
 
@@ -242,7 +243,7 @@ describe('InventoryItemRepository', () => {
         { id: '123', name: 'Item 1', status: 'low' },
         { id: '456', name: 'Item 2', status: 'low' },
       ];
-      (fetchMany as jest.Mock).mockResolvedValueOnce({ data: mockItems, error: null, success: true });
+      vi.mocked(fetchMany).mockResolvedValueOnce({ data: mockItems, error: null, success: true });
 
       const result = await repository.findByStatus('low', { limit: 10 });
 
@@ -261,7 +262,7 @@ describe('InventoryItemRepository', () => {
         { id: '456', name: 'Item 2', expiry_date: '2023-01-02' },
       ];
 
-      (connectionManager.executeWithRetry as jest.Mock).mockImplementation(async (callback) => {
+      vi.mocked(connectionManager.executeWithRetry).mockImplementation(async (callback) => {
         // Call the callback with a mock client
         return mockItems;
       });
@@ -273,7 +274,7 @@ describe('InventoryItemRepository', () => {
     });
 
     it('should return an empty array if there is an error', async () => {
-      (connectionManager.executeWithRetry as jest.Mock).mockRejectedValueOnce(new Error('Database error'));
+      vi.mocked(connectionManager.executeWithRetry).mockRejectedValueOnce(new Error('Database error'));
 
       const result = await repository.findExpiringSoon(7);
 
@@ -288,7 +289,7 @@ describe('InventoryItemRepository', () => {
         { id: '456', name: 'Item 2', current_quantity: 2, minimum_quantity: 5 },
       ];
 
-      (connectionManager.executeWithRetry as jest.Mock).mockImplementation(async (callback) => {
+      vi.mocked(connectionManager.executeWithRetry).mockImplementation(async (callback) => {
         // Call the callback with a mock client
         return mockItems;
       });
@@ -300,7 +301,7 @@ describe('InventoryItemRepository', () => {
     });
 
     it('should return an empty array if there is an error', async () => {
-      (connectionManager.executeWithRetry as jest.Mock).mockRejectedValueOnce(new Error('Database error'));
+      vi.mocked(connectionManager.executeWithRetry).mockRejectedValueOnce(new Error('Database error'));
 
       const result = await repository.findNeedingRestock();
 

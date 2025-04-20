@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   fetchById,
   fetchMany,
@@ -13,23 +14,23 @@ import {
 import { connectionManager } from '../../lib/supabase';
 
 // Mock the connection manager
-jest.mock('../../lib/supabase', () => {
+vi.mock('../../lib/supabase', () => {
   return {
     connectionManager: {
-      executeWithRetry: jest.fn(),
+      executeWithRetry: vi.fn(),
     },
   };
 });
 
 describe('Database Utilities', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('fetchById', () => {
     it('should fetch a record by ID successfully', async () => {
       const mockData = { id: '123', name: 'Test Item' };
-      (connectionManager.executeWithRetry as jest.Mock).mockResolvedValueOnce(mockData);
+      vi.mocked(connectionManager.executeWithRetry).mockResolvedValueOnce(mockData);
 
       const result = await fetchById('inventory_items', '123');
 
@@ -41,7 +42,7 @@ describe('Database Utilities', () => {
 
     it('should handle errors when fetching by ID', async () => {
       const mockError = new Error('Database error');
-      (connectionManager.executeWithRetry as jest.Mock).mockRejectedValueOnce(mockError);
+      vi.mocked(connectionManager.executeWithRetry).mockRejectedValueOnce(mockError);
 
       const result = await fetchById('inventory_items', '123');
 
@@ -57,7 +58,7 @@ describe('Database Utilities', () => {
         { id: '123', name: 'Item 1' },
         { id: '456', name: 'Item 2' },
       ];
-      (connectionManager.executeWithRetry as jest.Mock).mockResolvedValueOnce(mockData);
+      vi.mocked(connectionManager.executeWithRetry).mockResolvedValueOnce(mockData);
 
       const result = await fetchMany('inventory_items', {
         filters: { category: 'electronics' },
@@ -74,7 +75,7 @@ describe('Database Utilities', () => {
 
     it('should handle errors when fetching multiple records', async () => {
       const mockError = new Error('Database error');
-      (connectionManager.executeWithRetry as jest.Mock).mockRejectedValueOnce(mockError);
+      vi.mocked(connectionManager.executeWithRetry).mockRejectedValueOnce(mockError);
 
       const result = await fetchMany('inventory_items');
 
@@ -87,7 +88,7 @@ describe('Database Utilities', () => {
   describe('insert', () => {
     it('should insert a record successfully', async () => {
       const mockData = { id: '123', name: 'New Item', category: 'electronics' };
-      (connectionManager.executeWithRetry as jest.Mock).mockResolvedValueOnce(mockData);
+      vi.mocked(connectionManager.executeWithRetry).mockResolvedValueOnce(mockData);
 
       const result = await insert('inventory_items', { name: 'New Item', category: 'electronics' });
 
@@ -99,7 +100,7 @@ describe('Database Utilities', () => {
 
     it('should handle errors when inserting a record', async () => {
       const mockError = new Error('Database error');
-      (connectionManager.executeWithRetry as jest.Mock).mockRejectedValueOnce(mockError);
+      vi.mocked(connectionManager.executeWithRetry).mockRejectedValueOnce(mockError);
 
       const result = await insert('inventory_items', { name: 'New Item' });
 
@@ -112,7 +113,7 @@ describe('Database Utilities', () => {
   describe('update', () => {
     it('should update a record successfully', async () => {
       const mockData = { id: '123', name: 'Updated Item', category: 'electronics' };
-      (connectionManager.executeWithRetry as jest.Mock).mockResolvedValueOnce(mockData);
+      vi.mocked(connectionManager.executeWithRetry).mockResolvedValueOnce(mockData);
 
       const result = await update('inventory_items', '123', { name: 'Updated Item' });
 
@@ -124,7 +125,7 @@ describe('Database Utilities', () => {
 
     it('should handle errors when updating a record', async () => {
       const mockError = new Error('Database error');
-      (connectionManager.executeWithRetry as jest.Mock).mockRejectedValueOnce(mockError);
+      vi.mocked(connectionManager.executeWithRetry).mockRejectedValueOnce(mockError);
 
       const result = await update('inventory_items', '123', { name: 'Updated Item' });
 
@@ -136,7 +137,7 @@ describe('Database Utilities', () => {
 
   describe('remove', () => {
     it('should remove a record successfully', async () => {
-      (connectionManager.executeWithRetry as jest.Mock).mockResolvedValueOnce(null);
+      vi.mocked(connectionManager.executeWithRetry).mockResolvedValueOnce(null);
 
       const result = await remove('inventory_items', '123');
 
@@ -148,7 +149,7 @@ describe('Database Utilities', () => {
 
     it('should handle errors when removing a record', async () => {
       const mockError = new Error('Database error');
-      (connectionManager.executeWithRetry as jest.Mock).mockRejectedValueOnce(mockError);
+      vi.mocked(connectionManager.executeWithRetry).mockRejectedValueOnce(mockError);
 
       const result = await remove('inventory_items', '123');
 
@@ -161,7 +162,7 @@ describe('Database Utilities', () => {
   describe('executeCustomQuery', () => {
     it('should execute a custom query successfully', async () => {
       const mockData = [{ count: 5 }];
-      (connectionManager.executeWithRetry as jest.Mock).mockResolvedValueOnce(mockData);
+      vi.mocked(connectionManager.executeWithRetry).mockResolvedValueOnce(mockData);
 
       const result = await executeCustomQuery(async (client) => {
         // In a real scenario, this would use the client to execute a custom query
@@ -176,7 +177,7 @@ describe('Database Utilities', () => {
 
     it('should handle errors when executing a custom query', async () => {
       const mockError = new Error('Database error');
-      (connectionManager.executeWithRetry as jest.Mock).mockRejectedValueOnce(mockError);
+      vi.mocked(connectionManager.executeWithRetry).mockRejectedValueOnce(mockError);
 
       const result = await executeCustomQuery(async (client) => {
         throw mockError;

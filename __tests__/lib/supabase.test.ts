@@ -1,26 +1,27 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ConnectionStatus, connectionManager } from '../../lib/supabase';
 import { DB_CONFIG } from '../../lib/config';
 
 // Mock the Supabase client
-jest.mock('@supabase/supabase-js', () => {
+vi.mock('@supabase/supabase-js', () => {
   const mockClient = {
-    from: jest.fn().mockReturnThis(),
-    select: jest.fn().mockReturnThis(),
-    eq: jest.fn().mockReturnThis(),
-    limit: jest.fn().mockReturnThis(),
-    single: jest.fn().mockReturnThis(),
-    then: jest.fn().mockImplementation(callback => {
+    from: vi.fn().mockReturnThis(),
+    select: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockReturnThis(),
+    single: vi.fn().mockReturnThis(),
+    then: vi.fn().mockImplementation(callback => {
       return callback({ data: [], error: null });
     }),
   };
 
   return {
-    createClient: jest.fn().mockReturnValue(mockClient),
+    createClient: vi.fn().mockReturnValue(mockClient),
   };
 });
 
 // Mock the config
-jest.mock('../../lib/config', () => ({
+vi.mock('../../lib/config', () => ({
   DB_CONFIG: {
     supabaseUrl: 'https://mock-url.supabase.co',
     supabaseAnonKey: 'mock-anon-key',
@@ -30,7 +31,7 @@ jest.mock('../../lib/config', () => ({
     retryInterval: 100,
     poolSize: 5,
   },
-  validateConfig: jest.fn(),
+  validateConfig: vi.fn(),
   isProduction: false,
   isDevelopment: true,
   isTest: false,
@@ -92,11 +93,11 @@ describe('Supabase Connection Manager', () => {
 
     it('should handle connection errors during health check', async () => {
       // Mock a failed health check
-      const mockFrom = jest.fn().mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            limit: jest.fn().mockReturnValue({
-              then: jest.fn().mockImplementation(callback => {
+      const mockFrom = vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            limit: vi.fn().mockReturnValue({
+              then: vi.fn().mockImplementation(callback => {
                 return callback({ data: null, error: new Error('Connection error') });
               }),
             }),
@@ -105,7 +106,7 @@ describe('Supabase Connection Manager', () => {
       });
 
       // @ts-ignore - replacing the client for testing
-      connectionManager.getClient = jest.fn().mockReturnValue({
+      connectionManager.getClient = vi.fn().mockReturnValue({
         from: mockFrom,
       });
 
@@ -125,7 +126,7 @@ describe('Supabase Connection Manager', () => {
       // This is necessary because in the test environment, the status doesn't automatically
       // change to CONNECTED after resetConnection
       const originalGetStatus = connectionManager.getStatus;
-      connectionManager.getStatus = jest.fn().mockReturnValue(ConnectionStatus.CONNECTED);
+      connectionManager.getStatus = vi.fn().mockReturnValue(ConnectionStatus.CONNECTED);
 
       // Reset the connection
       const client = await connectionManager.resetConnection();
@@ -143,7 +144,7 @@ describe('Supabase Connection Manager', () => {
     it('should retry failed operations', async () => {
       // Mock a function that fails twice then succeeds
       let attempts = 0;
-      const mockOperation = jest.fn().mockImplementation(() => {
+      const mockOperation = vi.fn().mockImplementation(() => {
         attempts++;
         if (attempts <= 2) {
           throw new Error('Operation failed');
@@ -159,7 +160,7 @@ describe('Supabase Connection Manager', () => {
 
     it('should throw an error after max retries', async () => {
       // Mock a function that always fails
-      const mockOperation = jest.fn().mockImplementation(() => {
+      const mockOperation = vi.fn().mockImplementation(() => {
         throw new Error('Operation failed');
       });
 

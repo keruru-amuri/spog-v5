@@ -1,47 +1,58 @@
+import { describe, it, expect, vi, beforeEach, jest } from 'vitest';
 import { MigrationManager } from '../../../lib/migrations/migration-manager';
 import { connectionManager, mockClient } from '../../../lib/supabase';
 import { Migration, MigrationStatus } from '../../../lib/migrations/types';
 import { createMigration } from '../../../lib/migrations/migration-factory';
 
 // Mock the connection manager
-jest.mock('../../../lib/supabase', () => {
+vi.mock('../../../lib/supabase', () => {
   // Create a mock client that can be configured for each test
   const mockClient = {
-    from: jest.fn().mockReturnThis(),
-    select: jest.fn().mockReturnThis(),
-    insert: jest.fn().mockReturnThis(),
-    update: jest.fn().mockReturnThis(),
-    delete: jest.fn().mockReturnThis(),
-    eq: jest.fn().mockReturnThis(),
-    order: jest.fn().mockReturnThis(),
-    limit: jest.fn().mockReturnThis(),
-    rpc: jest.fn().mockReturnThis(),
+    from: vi.fn().mockReturnThis(),
+    select: vi.fn().mockReturnThis(),
+    insert: vi.fn().mockReturnThis(),
+    update: vi.fn().mockReturnThis(),
+    delete: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    order: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockReturnThis(),
+    rpc: vi.fn().mockReturnThis(),
   };
 
   return {
     connectionManager: {
-      executeWithRetry: jest.fn(),
-      getClient: jest.fn().mockReturnValue(mockClient),
+      executeWithRetry: vi.fn(),
+      getClient: vi.fn().mockReturnValue(mockClient),
     },
     mockClient, // Export the mock client for test configuration
   };
 });
 
 // Mock fs
-jest.mock('fs', () => {
+vi.mock('fs', () => {
   return {
-    readFileSync: jest.fn().mockReturnValue('-- SQL content'),
-    readdirSync: jest.fn().mockReturnValue(['migration1.ts', 'migration2.ts']),
-    existsSync: jest.fn().mockReturnValue(true),
-    mkdirSync: jest.fn(),
-    writeFileSync: jest.fn(),
+    readFileSync: vi.fn().mockReturnValue('-- SQL content'),
+    readdirSync: vi.fn().mockReturnValue(['migration1.ts', 'migration2.ts']),
+    existsSync: vi.fn().mockReturnValue(true),
+    mkdirSync: vi.fn(),
+    writeFileSync: vi.fn(),
+    default: {
+      readFileSync: vi.fn().mockReturnValue('-- SQL content'),
+      readdirSync: vi.fn().mockReturnValue(['migration1.ts', 'migration2.ts']),
+      existsSync: vi.fn().mockReturnValue(true),
+      mkdirSync: vi.fn(),
+      writeFileSync: vi.fn(),
+    },
   };
 });
 
 // Mock path
-jest.mock('path', () => {
+vi.mock('path', () => {
   return {
-    join: jest.fn().mockReturnValue('/path/to/migrations'),
+    join: vi.fn().mockReturnValue('/path/to/migrations'),
+    default: {
+      join: vi.fn().mockReturnValue('/path/to/migrations'),
+    },
   };
 });
 
@@ -49,7 +60,7 @@ describe('MigrationManager', () => {
   let manager: MigrationManager;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     manager = new MigrationManager({ logging: false });
   });
 
@@ -70,7 +81,7 @@ describe('MigrationManager', () => {
       }));
 
       // Mock executeWithRetry
-      (connectionManager.executeWithRetry as jest.Mock).mockImplementation(async (callback) => {
+      vi.mocked(connectionManager.executeWithRetry).mockImplementation(async (callback) => {
         await callback(mockClient);
       });
 
@@ -103,8 +114,8 @@ describe('MigrationManager', () => {
     it('should register a migration', () => {
       const migration: Migration = {
         name: 'test_migration',
-        up: jest.fn(),
-        down: jest.fn(),
+        up: vi.fn(),
+        down: vi.fn(),
       };
 
       manager.register(migration);
@@ -118,13 +129,13 @@ describe('MigrationManager', () => {
       const migrations: Migration[] = [
         {
           name: 'test_migration_1',
-          up: jest.fn(),
-          down: jest.fn(),
+          up: vi.fn(),
+          down: vi.fn(),
         },
         {
           name: 'test_migration_2',
-          up: jest.fn(),
-          down: jest.fn(),
+          up: vi.fn(),
+          down: vi.fn(),
         },
       ];
 
@@ -172,13 +183,13 @@ describe('MigrationManager', () => {
 
   describe('getPendingMigrations', () => {
     it('should return pending migrations', async () => {
-      const appliedMigration = createMigration('applied_migration', jest.fn(), jest.fn());
-      const pendingMigration = createMigration('pending_migration', jest.fn(), jest.fn());
+      const appliedMigration = createMigration('applied_migration', vi.fn(), vi.fn());
+      const pendingMigration = createMigration('pending_migration', vi.fn(), vi.fn());
 
       manager.registerMany([appliedMigration, pendingMigration]);
 
       // Mock getAppliedMigrations
-      jest.spyOn(manager, 'getAppliedMigrations').mockResolvedValueOnce([
+      vi.spyOn(manager, 'getAppliedMigrations').mockResolvedValueOnce([
         {
           id: '123',
           name: 'applied_migration',
@@ -232,18 +243,18 @@ describe('MigrationManager', () => {
   describe('up', () => {
     it('should apply pending migrations', async () => {
       // Mock initialize
-      jest.spyOn(manager, 'initialize').mockResolvedValueOnce();
+      vi.spyOn(manager, 'initialize').mockResolvedValueOnce();
 
       // Mock getLatestBatch
-      jest.spyOn(manager, 'getLatestBatch').mockResolvedValueOnce(0);
+      vi.spyOn(manager, 'getLatestBatch').mockResolvedValueOnce(0);
 
       // Mock getPendingMigrations
-      const migration1 = createMigration('migration1', jest.fn(), jest.fn());
-      const migration2 = createMigration('migration2', jest.fn(), jest.fn());
-      jest.spyOn(manager, 'getPendingMigrations').mockResolvedValueOnce([migration1, migration2]);
+      const migration1 = createMigration('migration1', vi.fn(), vi.fn());
+      const migration2 = createMigration('migration2', vi.fn(), vi.fn());
+      vi.spyOn(manager, 'getPendingMigrations').mockResolvedValueOnce([migration1, migration2]);
 
       // Mock executeWithRetry
-      (connectionManager.executeWithRetry as jest.Mock).mockImplementation(async (callback) => {
+      vi.mocked(connectionManager.executeWithRetry).mockImplementation(async (callback) => {
         await callback(connectionManager.getClient());
       });
 
@@ -272,17 +283,17 @@ describe('MigrationManager', () => {
 
     it('should handle errors when applying migrations', async () => {
       // Mock initialize
-      jest.spyOn(manager, 'initialize').mockResolvedValueOnce();
+      vi.spyOn(manager, 'initialize').mockResolvedValueOnce();
 
       // Mock getLatestBatch
-      jest.spyOn(manager, 'getLatestBatch').mockResolvedValueOnce(0);
+      vi.spyOn(manager, 'getLatestBatch').mockResolvedValueOnce(0);
 
       // Mock getPendingMigrations
-      const migration = createMigration('migration1', jest.fn().mockRejectedValueOnce(new Error('Migration error')), jest.fn());
-      jest.spyOn(manager, 'getPendingMigrations').mockResolvedValueOnce([migration]);
+      const migration = createMigration('migration1', vi.fn().mockRejectedValueOnce(new Error('Migration error')), vi.fn());
+      vi.spyOn(manager, 'getPendingMigrations').mockResolvedValueOnce([migration]);
 
       // Mock executeWithRetry
-      (connectionManager.executeWithRetry as jest.Mock).mockRejectedValueOnce(new Error('Migration error'));
+      vi.mocked(connectionManager.executeWithRetry).mockRejectedValueOnce(new Error('Migration error'));
 
       // Mock client.from().insert()
       const mockClient = connectionManager.getClient();
@@ -328,7 +339,7 @@ describe('MigrationManager', () => {
       };
 
       // Mock the down method
-      jest.spyOn(manager, 'down').mockResolvedValueOnce(mockResult);
+      vi.spyOn(manager, 'down').mockResolvedValueOnce(mockResult);
 
       const result = await manager.down();
 
