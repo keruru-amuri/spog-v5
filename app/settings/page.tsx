@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { DashboardLayout } from '@/components/layouts/DashboardLayout';
+
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
@@ -11,11 +11,12 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/contexts/AuthContext';
+import { AppLayout } from '@/components/layouts/AppLayout';
 
 export default function SettingsPage() {
   const { user } = useAuth();
   const [saving, setSaving] = useState(false);
-  
+
   // Mock settings
   const [notificationSettings, setNotificationSettings] = useState({
     emailNotifications: true,
@@ -23,46 +24,47 @@ export default function SettingsPage() {
     weeklyReports: false,
     systemUpdates: true
   });
-  
+
   const [displaySettings, setDisplaySettings] = useState({
     theme: 'system',
     language: 'en',
     density: 'comfortable'
   });
-  
+
   const handleNotificationChange = (key: string, value: boolean) => {
     setNotificationSettings(prev => ({
       ...prev,
       [key]: value
     }));
   };
-  
+
   const handleDisplayChange = (key: string, value: string) => {
     setDisplaySettings(prev => ({
       ...prev,
       [key]: value
     }));
   };
-  
+
   const handleSaveSettings = () => {
     setSaving(true);
-    
+
     // Simulate API call
     setTimeout(() => {
       setSaving(false);
     }, 1000);
   };
-  
+
   return (
-    <DashboardLayout>
-      <div className="container mx-auto p-6">
+    <AppLayout>
+      <div className="p-6">
+        <div className="container mx-auto">
         <div className="mb-6">
           <h1 className="text-3xl font-bold">Settings</h1>
           <p className="text-muted-foreground">
             Manage your account and application preferences
           </p>
         </div>
-        
+
         <Tabs defaultValue="account" className="space-y-6">
           <TabsList>
             <TabsTrigger value="account">Account</TabsTrigger>
@@ -70,7 +72,7 @@ export default function SettingsPage() {
             <TabsTrigger value="display">Display</TabsTrigger>
             <TabsTrigger value="security">Security</TabsTrigger>
           </TabsList>
-          
+
           {/* Account Settings */}
           <TabsContent value="account">
             <Card>
@@ -83,37 +85,37 @@ export default function SettingsPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
-                  <Input 
-                    id="name" 
-                    defaultValue={user ? `${user.firstName} ${user.lastName}` : ''} 
+                  <Input
+                    id="name"
+                    defaultValue={user ? `${user.firstName} ${user.lastName}` : ''}
                     disabled={!user}
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="email">Email Address</Label>
-                  <Input 
-                    id="email" 
-                    type="email" 
-                    defaultValue={user?.email} 
+                  <Input
+                    id="email"
+                    type="email"
+                    defaultValue={user?.email}
                     disabled={!user}
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="department">Department</Label>
-                  <Input 
-                    id="department" 
-                    defaultValue={user?.department || ''} 
+                  <Input
+                    id="department"
+                    defaultValue={user?.department || ''}
                     disabled={!user}
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="role">Role</Label>
-                  <Input 
-                    id="role" 
-                    defaultValue={user?.role || ''} 
+                  <Input
+                    id="role"
+                    defaultValue={user?.role || ''}
                     disabled
                   />
                   <p className="text-sm text-muted-foreground">
@@ -128,7 +130,7 @@ export default function SettingsPage() {
               </CardFooter>
             </Card>
           </TabsContent>
-          
+
           {/* Notification Settings */}
           <TabsContent value="notifications">
             <Card>
@@ -152,9 +154,9 @@ export default function SettingsPage() {
                     onCheckedChange={(checked) => handleNotificationChange('emailNotifications', checked)}
                   />
                 </div>
-                
+
                 <Separator />
-                
+
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label htmlFor="stock-alerts">Stock Alerts</Label>
@@ -168,9 +170,9 @@ export default function SettingsPage() {
                     onCheckedChange={(checked) => handleNotificationChange('stockAlerts', checked)}
                   />
                 </div>
-                
+
                 <Separator />
-                
+
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label htmlFor="weekly-reports">Weekly Reports</Label>
@@ -184,9 +186,9 @@ export default function SettingsPage() {
                     onCheckedChange={(checked) => handleNotificationChange('weeklyReports', checked)}
                   />
                 </div>
-                
+
                 <Separator />
-                
+
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label htmlFor="system-updates">System Updates</Label>
@@ -208,7 +210,7 @@ export default function SettingsPage() {
               </CardFooter>
             </Card>
           </TabsContent>
-          
+
           {/* Display Settings */}
           <TabsContent value="display">
             <Card>
@@ -238,9 +240,9 @@ export default function SettingsPage() {
                     Choose between light, dark, or system default theme
                   </p>
                 </div>
-                
+
                 <Separator />
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="language">Language</Label>
                   <Select
@@ -261,9 +263,9 @@ export default function SettingsPage() {
                     Select your preferred language for the interface
                   </p>
                 </div>
-                
+
                 <Separator />
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="density">Display Density</Label>
                   <Select
@@ -291,7 +293,7 @@ export default function SettingsPage() {
               </CardFooter>
             </Card>
           </TabsContent>
-          
+
           {/* Security Settings */}
           <TabsContent value="security">
             <Card>
@@ -306,12 +308,12 @@ export default function SettingsPage() {
                   <Label htmlFor="current-password">Current Password</Label>
                   <Input id="current-password" type="password" />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="new-password">New Password</Label>
                   <Input id="new-password" type="password" />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="confirm-password">Confirm New Password</Label>
                   <Input id="confirm-password" type="password" />
@@ -319,9 +321,9 @@ export default function SettingsPage() {
                     Password must be at least 8 characters and include a mix of letters, numbers, and symbols
                   </p>
                 </div>
-                
+
                 <Separator />
-                
+
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label htmlFor="two-factor">Two-Factor Authentication</Label>
@@ -331,9 +333,9 @@ export default function SettingsPage() {
                   </div>
                   <Button variant="outline">Set Up</Button>
                 </div>
-                
+
                 <Separator />
-                
+
                 <div className="space-y-2">
                   <h3 className="text-sm font-medium">Session Management</h3>
                   <p className="text-sm text-muted-foreground">
@@ -352,7 +354,8 @@ export default function SettingsPage() {
             </Card>
           </TabsContent>
         </Tabs>
+        </div>
       </div>
-    </DashboardLayout>
+    </AppLayout>
   );
 }

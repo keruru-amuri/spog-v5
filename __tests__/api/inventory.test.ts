@@ -45,7 +45,7 @@ const createMockRequest = (method: string, url: string, body?: any) => {
   const request = {
     method,
     url,
-    json: vi.fn().mockResolvedValue(body),
+    json: jest.fn().mockResolvedValue(body),
   } as unknown as NextRequest;
 
   // Add URL object for GET requests

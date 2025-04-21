@@ -1,12 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase-server';
-import { InventoryItemRepository } from '@/repositories/inventory-item-repository';
 import { inventoryItemQuerySchema } from '@/lib/schemas/inventory';
 import { ZodError } from 'zod';
-import { hasPermission } from '@/lib/auth';
-
-// Create repository instance
-const inventoryItemRepository = new InventoryItemRepository();
+import { hasPermission } from '@/lib/auth-server';
+import { mockInventoryItems } from './mock-route';
 
 /**
  * @swagger
@@ -136,59 +133,58 @@ export async function GET(request: NextRequest) {
       location_id,
       status,
       search,
-      limit,
-      offset,
-      sort_by,
-      sort_order
+      limit = 50,
+      offset = 0,
+      sort_by = 'name',
+      sort_order = 'asc'
     } = validatedParams.data;
 
-    // Create filter object
-    const filter: Record<string, any> = {};
+    // Filter items based on query parameters
+    let filteredItems = [...mockInventoryItems];
 
     if (category) {
-      filter.category = category;
+      filteredItems = filteredItems.filter(item => item.category === category);
     }
 
     if (location_id) {
-      filter.location_id = location_id;
+      filteredItems = filteredItems.filter(item => item.location_id === location_id);
     }
 
     if (status) {
-      filter.status = status;
+      filteredItems = filteredItems.filter(item => item.status === status);
     }
-
-    // Create query options
-    const options = {
-      limit: limit || 50,
-      offset: offset || 0,
-      orderBy: sort_by ? {
-        column: sort_by,
-        ascending: sort_order !== 'desc'
-      } : undefined
-    };
-
-    // Get inventory items
-    let items;
 
     if (search) {
-      // If search parameter is provided, use custom search method
-      items = await inventoryItemRepository.search(search, options);
-    } else {
-      // Otherwise, use standard findBy method
-      items = await inventoryItemRepository.findBy(filter, options);
+      const searchLower = search.toLowerCase();
+      filteredItems = filteredItems.filter(item =>
+        item.name.toLowerCase().includes(searchLower) ||
+        (item.description && item.description.toLowerCase().includes(searchLower)) ||
+        item.id.toLowerCase().includes(searchLower)
+      );
     }
 
-    // Get total count for pagination
-    const totalCount = await inventoryItemRepository.count(filter);
+    // Sort items
+    filteredItems.sort((a: any, b: any) => {
+      const aValue = a[sort_by];
+      const bValue = b[sort_by];
+
+      if (aValue < bValue) return sort_order === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sort_order === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    // Apply pagination
+    const totalCount = filteredItems.length;
+    const paginatedItems = filteredItems.slice(offset, offset + limit);
 
     // Return response
     return NextResponse.json({
-      items,
+      items: paginatedItems,
       pagination: {
         total: totalCount,
-        limit: options.limit,
-        offset: options.offset,
-        hasMore: (options.offset + options.limit) < totalCount
+        limit,
+        offset,
+        hasMore: (offset + limit) < totalCount
       }
     });
   } catch (error) {
@@ -260,54 +256,11 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    // Create a Supabase server client
-    const supabase = createServerClient();
-
-    // Get the current user
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    // Check if user has permission to create inventory items
-    const canCreateItems = await hasPermission(user.id, 'inventory:create');
-
-    if (!canCreateItems) {
-      return NextResponse.json(
-        { error: 'Forbidden: You do not have permission to create inventory items' },
-        { status: 403 }
-      );
-    }
-
-    // Parse request body
-    const requestData = await request.json();
-
-    // Validate request data
-    const { createInventoryItemSchema } = await import('@/lib/schemas/inventory');
-    const validatedData = createInventoryItemSchema.safeParse(requestData);
-
-    if (!validatedData.success) {
-      return NextResponse.json(
-        { error: 'Invalid request data', details: validatedData.error.format() },
-        { status: 400 }
-      );
-    }
-
-    // Add created_by field
-    const itemData = {
-      ...validatedData.data,
-      created_by: user.id
-    };
-
-    // Create inventory item
-    const item = await inventoryItemRepository.create(itemData);
-
-    // Return response
-    return NextResponse.json({ item }, { status: 201 });
+    // This is a mock implementation
+    return NextResponse.json(
+      { error: 'Not implemented' },
+      { status: 501 }
+    );
   } catch (error) {
     console.error('Error creating inventory item:', error);
 

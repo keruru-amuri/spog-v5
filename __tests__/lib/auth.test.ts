@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import {
   login,
   register,
@@ -18,36 +18,36 @@ import { PERMISSIONS } from '../../types/user';
 import { supabase } from '../../lib/supabase';
 
 // Mock the supabase client
-vi.mock('../../lib/supabase', () => {
+jest.mock('../../lib/supabase', () => {
   return {
     supabase: {
       auth: {
-        signInWithPassword: vi.fn(),
-        signUp: vi.fn(),
-        signOut: vi.fn(),
-        resetPasswordForEmail: vi.fn(),
-        updateUser: vi.fn(),
-        getUser: vi.fn(),
-        getSession: vi.fn(),
-        resend: vi.fn(),
+        signInWithPassword: jest.fn(),
+        signUp: jest.fn(),
+        signOut: jest.fn(),
+        resetPasswordForEmail: jest.fn(),
+        updateUser: jest.fn(),
+        getUser: jest.fn(),
+        getSession: jest.fn(),
+        resend: jest.fn(),
         admin: {
-          deleteUser: vi.fn(),
+          deleteUser: jest.fn(),
         },
       },
-      from: vi.fn(() => ({
-        select: vi.fn(() => ({
-          eq: vi.fn(() => ({
-            single: vi.fn(),
-            maybeSingle: vi.fn(),
+      from: jest.fn(() => ({
+        select: jest.fn(() => ({
+          eq: jest.fn(() => ({
+            single: jest.fn(),
+            maybeSingle: jest.fn(),
           })),
         })),
-        insert: vi.fn(() => ({
-          select: vi.fn(() => ({
-            single: vi.fn(),
+        insert: jest.fn(() => ({
+          select: jest.fn(() => ({
+            single: jest.fn(),
           })),
         })),
-        update: vi.fn(() => ({
-          eq: vi.fn(),
+        update: jest.fn(() => ({
+          eq: jest.fn(),
         })),
       })),
     },
@@ -57,7 +57,7 @@ vi.mock('../../lib/supabase', () => {
 describe('Authentication Utilities', () => {
   describe('login', () => {
     beforeEach(() => {
-      vi.clearAllMocks();
+      jest.clearAllMocks();
     });
 
     it('should authenticate a user with valid credentials', async () => {
@@ -67,7 +67,7 @@ describe('Authentication Utilities', () => {
       };
 
       // Mock successful authentication
-      vi.mocked(supabase.auth.signInWithPassword).mockResolvedValue({
+      (supabase.auth.signInWithPassword as jest.Mock).mockResolvedValue({
         data: {
           user: { id: 'user-123' },
           session: { access_token: 'mock-token', expires_at: Date.now() + 3600000 }
@@ -76,10 +76,10 @@ describe('Authentication Utilities', () => {
       });
 
       // Mock successful user retrieval
-      vi.mocked(supabase.from).mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            single: vi.fn().mockResolvedValue({
+      (supabase.from as jest.Mock).mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          eq: jest.fn().mockReturnValue({
+            single: jest.fn().mockResolvedValue({
               data: {
                 id: 'user-123',
                 email: 'test@example.com',
@@ -91,12 +91,12 @@ describe('Authentication Utilities', () => {
               },
               error: null,
             }),
-            maybeSingle: vi.fn(),
+            maybeSingle: jest.fn(),
           }),
         }),
-        insert: vi.fn(),
-        update: vi.fn().mockReturnValue({
-          eq: vi.fn(),
+        insert: jest.fn(),
+        update: jest.fn().mockReturnValue({
+          eq: jest.fn(),
         }),
       } as any);
 
@@ -121,7 +121,7 @@ describe('Authentication Utilities', () => {
 
   describe('register', () => {
     beforeEach(() => {
-      vi.clearAllMocks();
+      jest.clearAllMocks();
     });
 
     it('should register a new user with valid data', async () => {
@@ -134,19 +134,19 @@ describe('Authentication Utilities', () => {
       };
 
       // Mock user check
-      vi.mocked(supabase.from).mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            maybeSingle: vi.fn().mockResolvedValue({
+      (supabase.from as jest.Mock).mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          eq: jest.fn().mockReturnValue({
+            maybeSingle: jest.fn().mockResolvedValue({
               data: null,
               error: null,
             }),
-            single: vi.fn(),
+            single: jest.fn(),
           }),
         }),
-        insert: vi.fn().mockReturnValue({
-          select: vi.fn().mockReturnValue({
-            single: vi.fn().mockResolvedValue({
+        insert: jest.fn().mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            single: jest.fn().mockResolvedValue({
               data: {
                 id: 'user-123',
                 email: userData.email,
@@ -161,11 +161,11 @@ describe('Authentication Utilities', () => {
             }),
           }),
         }),
-        update: vi.fn(),
+        update: jest.fn(),
       } as any);
 
       // Mock successful signup
-      vi.mocked(supabase.auth.signUp).mockResolvedValue({
+      (supabase.auth.signUp as jest.Mock).mockResolvedValue({
         data: {
           user: { id: 'user-123' },
           session: { access_token: 'mock-token', expires_at: Date.now() + 3600000 }
@@ -201,12 +201,12 @@ describe('Authentication Utilities', () => {
 
   describe('logout', () => {
     beforeEach(() => {
-      vi.clearAllMocks();
+      jest.clearAllMocks();
     });
 
     it('should log out a user', async () => {
       // Mock successful logout
-      vi.mocked(supabase.auth.signOut).mockResolvedValue({
+      (supabase.auth.signOut as jest.Mock).mockResolvedValue({
         error: null,
       });
 
@@ -216,7 +216,7 @@ describe('Authentication Utilities', () => {
 
     it('should throw an error if logout fails', async () => {
       // Mock failed logout
-      vi.mocked(supabase.auth.signOut).mockResolvedValue({
+      (supabase.auth.signOut as jest.Mock).mockResolvedValue({
         error: { message: 'Logout failed', code: 'logout_failed' } as any,
       });
 
@@ -226,12 +226,12 @@ describe('Authentication Utilities', () => {
 
   describe('password reset', () => {
     beforeEach(() => {
-      vi.clearAllMocks();
+      jest.clearAllMocks();
     });
 
     it('should request a password reset', async () => {
       // Mock successful password reset request
-      vi.mocked(supabase.auth.resetPasswordForEmail).mockResolvedValue({
+      (supabase.auth.resetPasswordForEmail as jest.Mock).mockResolvedValue({
         error: null,
       });
 
@@ -246,7 +246,7 @@ describe('Authentication Utilities', () => {
 
     it('should throw an error if password reset request fails', async () => {
       // Mock failed password reset request
-      vi.mocked(supabase.auth.resetPasswordForEmail).mockResolvedValue({
+      (supabase.auth.resetPasswordForEmail as jest.Mock).mockResolvedValue({
         error: { message: 'Password reset failed', code: 'password_reset_failed' } as any,
       });
 
@@ -255,7 +255,7 @@ describe('Authentication Utilities', () => {
 
     it('should update password with valid token', async () => {
       // Mock successful password update
-      vi.mocked(supabase.auth.updateUser).mockResolvedValue({
+      (supabase.auth.updateUser as jest.Mock).mockResolvedValue({
         data: { user: { id: 'user-123' } },
         error: null,
       });
@@ -268,7 +268,7 @@ describe('Authentication Utilities', () => {
 
     it('should throw an error if password update fails', async () => {
       // Mock failed password update
-      vi.mocked(supabase.auth.updateUser).mockResolvedValue({
+      (supabase.auth.updateUser as jest.Mock).mockResolvedValue({
         data: { user: null },
         error: { message: 'Password update failed', code: 'password_update_failed' } as any,
       });
@@ -279,7 +279,7 @@ describe('Authentication Utilities', () => {
 
   describe('user profile', () => {
     beforeEach(() => {
-      vi.clearAllMocks();
+      jest.clearAllMocks();
     });
 
     it('should get user profile by ID', async () => {
@@ -296,18 +296,18 @@ describe('Authentication Utilities', () => {
         email_verified: true,
       };
 
-      vi.mocked(supabase.from).mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            single: vi.fn().mockResolvedValue({
+      (supabase.from as jest.Mock).mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          eq: jest.fn().mockReturnValue({
+            single: jest.fn().mockResolvedValue({
               data: mockUserData,
               error: null,
             }),
-            maybeSingle: vi.fn(),
+            maybeSingle: jest.fn(),
           }),
         }),
-        insert: vi.fn(),
-        update: vi.fn(),
+        insert: jest.fn(),
+        update: jest.fn(),
       } as any);
 
       const profile = await getUserProfile(userId);
@@ -326,18 +326,18 @@ describe('Authentication Utilities', () => {
       const userId = 'nonexistent-user';
 
       // Mock user not found
-      vi.mocked(supabase.from).mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            single: vi.fn().mockResolvedValue({
+      (supabase.from as jest.Mock).mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          eq: jest.fn().mockReturnValue({
+            single: jest.fn().mockResolvedValue({
               data: null,
               error: null,
             }),
-            maybeSingle: vi.fn(),
+            maybeSingle: jest.fn(),
           }),
         }),
-        insert: vi.fn(),
-        update: vi.fn(),
+        insert: jest.fn(),
+        update: jest.fn(),
       } as any);
 
       await expect(getUserProfile(userId)).rejects.toThrow(AuthError);
@@ -347,18 +347,18 @@ describe('Authentication Utilities', () => {
       const userId = 'user-123';
 
       // Mock database error
-      vi.mocked(supabase.from).mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            single: vi.fn().mockResolvedValue({
+      (supabase.from as jest.Mock).mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          eq: jest.fn().mockReturnValue({
+            single: jest.fn().mockResolvedValue({
               data: null,
               error: { message: 'Database error', code: 'database_error' } as any,
             }),
-            maybeSingle: vi.fn(),
+            maybeSingle: jest.fn(),
           }),
         }),
-        insert: vi.fn(),
-        update: vi.fn(),
+        insert: jest.fn(),
+        update: jest.fn(),
       } as any);
 
       await expect(getUserProfile(userId)).rejects.toThrow(AuthError);
@@ -398,12 +398,12 @@ describe('Authentication Utilities', () => {
 
   describe('token verification', () => {
     beforeEach(() => {
-      vi.clearAllMocks();
+      jest.clearAllMocks();
     });
 
     it('should verify a valid token', async () => {
       // Mock successful token verification
-      vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      (supabase.auth.getUser as jest.Mock).mockResolvedValue({
         data: { user: { id: 'user-123' } },
         error: null,
       });
@@ -415,7 +415,7 @@ describe('Authentication Utilities', () => {
 
     it('should reject an invalid token', async () => {
       // Mock failed token verification
-      vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      (supabase.auth.getUser as jest.Mock).mockResolvedValue({
         data: { user: null },
         error: { message: 'Invalid token', code: 'invalid_token' } as any,
       });
@@ -427,13 +427,13 @@ describe('Authentication Utilities', () => {
 
   describe('getCurrentSession', () => {
     beforeEach(() => {
-      vi.clearAllMocks();
+      jest.clearAllMocks();
     });
 
     it('should return the current session', async () => {
       // Mock successful session retrieval
       const mockSession = { user: { id: 'user-123' }, expires_at: '2023-12-31' };
-      vi.mocked(supabase.auth.getSession).mockResolvedValue({
+      (supabase.auth.getSession as jest.Mock).mockResolvedValue({
         data: { session: mockSession },
         error: null,
       });
@@ -445,7 +445,7 @@ describe('Authentication Utilities', () => {
 
     it('should return null if there is no session', async () => {
       // Mock no session
-      vi.mocked(supabase.auth.getSession).mockResolvedValue({
+      (supabase.auth.getSession as jest.Mock).mockResolvedValue({
         data: { session: null },
         error: null,
       });
@@ -456,7 +456,7 @@ describe('Authentication Utilities', () => {
 
     it('should return null if there is an error', async () => {
       // Mock error
-      vi.mocked(supabase.auth.getSession).mockResolvedValue({
+      (supabase.auth.getSession as jest.Mock).mockResolvedValue({
         data: { session: null },
         error: { message: 'Session error', code: 'session_error' } as any,
       });
@@ -468,13 +468,13 @@ describe('Authentication Utilities', () => {
 
   describe('getCurrentUser', () => {
     beforeEach(() => {
-      vi.clearAllMocks();
+      jest.clearAllMocks();
     });
 
     it('should return the current user profile', async () => {
       // Mock successful session retrieval
       const mockSession = { user: { id: 'user-123' }, expires_at: '2023-12-31' };
-      vi.mocked(supabase.auth.getSession).mockResolvedValue({
+      (supabase.auth.getSession as jest.Mock).mockResolvedValue({
         data: { session: mockSession },
         error: null,
       });
@@ -490,18 +490,18 @@ describe('Authentication Utilities', () => {
         email_verified: true,
       };
 
-      vi.mocked(supabase.from).mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            single: vi.fn().mockResolvedValue({
+      (supabase.from as jest.Mock).mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          eq: jest.fn().mockReturnValue({
+            single: jest.fn().mockResolvedValue({
               data: mockUserData,
               error: null,
             }),
-            maybeSingle: vi.fn(),
+            maybeSingle: jest.fn(),
           }),
         }),
-        insert: vi.fn(),
-        update: vi.fn(),
+        insert: jest.fn(),
+        update: jest.fn(),
       } as any);
 
       const user = await getCurrentUser();
@@ -513,7 +513,7 @@ describe('Authentication Utilities', () => {
 
     it('should return null if there is no session', async () => {
       // Mock no session
-      vi.mocked(supabase.auth.getSession).mockResolvedValue({
+      (supabase.auth.getSession as jest.Mock).mockResolvedValue({
         data: { session: null },
         error: null,
       });
@@ -525,12 +525,12 @@ describe('Authentication Utilities', () => {
 
   describe('sendEmailVerification', () => {
     beforeEach(() => {
-      vi.clearAllMocks();
+      jest.clearAllMocks();
     });
 
     it('should send email verification', async () => {
       // Mock successful email verification
-      vi.mocked(supabase.auth.resend).mockResolvedValue({
+      (supabase.auth.resend as jest.Mock).mockResolvedValue({
         data: {},
         error: null,
       });
@@ -547,7 +547,7 @@ describe('Authentication Utilities', () => {
 
     it('should throw an error if email verification fails', async () => {
       // Mock failed email verification
-      vi.mocked(supabase.auth.resend).mockResolvedValue({
+      (supabase.auth.resend as jest.Mock).mockResolvedValue({
         data: {},
         error: { message: 'Email verification failed', code: 'verification_email_failed' } as any,
       });

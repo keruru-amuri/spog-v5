@@ -1,26 +1,27 @@
 'use client';
 
-import { DashboardLayout } from '@/components/layouts/DashboardLayout';
 import { RoleDashboard } from '@/components/dashboard/RoleDashboard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
+import { AppLayout } from '@/components/layouts/AppLayout';
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  
+
   return (
-    <DashboardLayout>
-      <div className="container mx-auto p-6">
+    <AppLayout>
+      <div className="p-6">
+        <div className="container mx-auto">
         <div className="mb-6">
           <h1 className="text-3xl font-bold">Dashboard</h1>
           <p className="text-muted-foreground">
             Welcome to the SPOG Inventory Management System
           </p>
         </div>
-        
+
         {/* Role-specific dashboard content */}
         <RoleDashboard />
-        
+
         {/* Common dashboard content */}
         <div className="mt-8">
           <h2 className="text-xl font-semibold mb-4">System Overview</h2>
@@ -47,7 +48,7 @@ export default function DashboardPage() {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-base">Recent Activity</CardTitle>
@@ -66,7 +67,7 @@ export default function DashboardPage() {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-base">Quick Links</CardTitle>
@@ -82,7 +83,8 @@ export default function DashboardPage() {
             </Card>
           </div>
         </div>
+        </div>
       </div>
-    </DashboardLayout>
+    </AppLayout>
   );
 }
