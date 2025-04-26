@@ -24,12 +24,8 @@ jobs:
           node-version: '22.x'
 
       - name: npm install, build, and test
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: "https://placeholder-for-build.supabase.co"
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: "placeholder-key-for-build"
-          SUPABASE_SERVICE_KEY: "placeholder-service-key-for-build"
         run: |
-          npm install --legacy-peer-deps
+          npm install
           npm run build --if-present
           npm run test --if-present
 
@@ -48,7 +44,7 @@ jobs:
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-
+    
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
@@ -57,7 +53,7 @@ jobs:
 
       - name: Unzip artifact for deployment
         run: unzip release.zip
-
+      
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
@@ -65,4 +61,4 @@ jobs:
           app-name: 'spog-inventory-app'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_B1DEDCF773FF4BC3BA5397A8ED3F95BC }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_178E939D81F7418AA1BD25CE2870B77F }}
