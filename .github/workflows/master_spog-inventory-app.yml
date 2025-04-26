@@ -66,4 +66,4 @@ jobs:
           app-name: 'spog-inventory-app'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_B1DEDCF773FF4BC3BA5397A8ED3F95BC }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_178E939D81F7418AA1BD25CE2870B77F }}
