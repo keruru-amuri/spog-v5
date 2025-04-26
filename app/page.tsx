@@ -9,7 +9,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">SPOG Inventory</CardTitle>
+          <CardTitle className="text-2xl font-bold">MABES SPOG Inventory</CardTitle>
           <CardDescription>Sign in to manage your sealant, paint, oil, and grease inventory</CardDescription>
         </CardHeader>
         <CardContent>

@@ -7,11 +7,11 @@ import { UserRole } from '@/types/user';
 
 export function RoleDashboard() {
   const { user } = useAuth();
-  
+
   if (!user) {
     return null;
   }
-  
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {/* Common dashboard cards for all users */}
@@ -26,7 +26,7 @@ export function RoleDashboard() {
           <p>Your last login was: {user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'First login'}</p>
         </CardContent>
       </Card>
-      
+
       {/* Admin-specific dashboard cards */}
       {user.role === 'admin' && (
         <>
@@ -46,7 +46,7 @@ export function RoleDashboard() {
               </CardContent>
             </Card>
           </PermissionGuard>
-          
+
           <PermissionGuard permission="report:generate">
             <Card>
               <CardHeader>
@@ -57,7 +57,7 @@ export function RoleDashboard() {
               </CardHeader>
               <CardContent>
                 <p>Access comprehensive system reports and analytics.</p>
-                <a href="/reports" className="text-primary hover:underline mt-2 inline-block">
+                <a href="/reports_v1" className="text-primary hover:underline mt-2 inline-block">
                   View Reports →
                 </a>
               </CardContent>
@@ -65,7 +65,7 @@ export function RoleDashboard() {
           </PermissionGuard>
         </>
       )}
-      
+
       {/* Manager-specific dashboard cards */}
       {user.role === 'manager' && (
         <>
@@ -85,7 +85,7 @@ export function RoleDashboard() {
               </CardContent>
             </Card>
           </PermissionGuard>
-          
+
           <PermissionGuard permission="report:generate">
             <Card>
               <CardHeader>
@@ -96,7 +96,7 @@ export function RoleDashboard() {
               </CardHeader>
               <CardContent>
                 <p>View consumption reports and identify trends.</p>
-                <a href="/reports" className="text-primary hover:underline mt-2 inline-block">
+                <a href="/reports_v1" className="text-primary hover:underline mt-2 inline-block">
                   View Reports →
                 </a>
               </CardContent>
@@ -104,7 +104,7 @@ export function RoleDashboard() {
           </PermissionGuard>
         </>
       )}
-      
+
       {/* Regular user-specific dashboard cards */}
       {user.role === 'user' && (
         <>
@@ -124,7 +124,7 @@ export function RoleDashboard() {
               </CardContent>
             </Card>
           </PermissionGuard>
-          
+
           <PermissionGuard permission="consumption:create">
             <Card>
               <CardHeader>

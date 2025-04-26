@@ -17,9 +17,23 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { useAuth } from '@/contexts/AuthContext';
+import { PERMISSIONS } from '@/types/user';
+import { Trash2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 export default function InventoryPage() {
   const { showSuccessToast, showErrorToast } = useToastContext();
+  const { hasPermission } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -27,6 +41,8 @@ export default function InventoryPage() {
   const [isAddItemModalOpen, setIsAddItemModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<InventoryItem | null>(null);
 
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
@@ -59,6 +75,49 @@ export default function InventoryPage() {
   const handleOpenConsumptionModal = (item: InventoryItem) => {
     setSelectedItem(item);
     setIsConsumptionModalOpen(true);
+  };
+
+  // Function to handle opening the delete confirmation dialog
+  const handleOpenDeleteDialog = (item: InventoryItem) => {
+    setItemToDelete(item);
+    setIsDeleteDialogOpen(true);
+  };
+
+  // Function to handle deleting an inventory item
+  const handleDeleteItem = async () => {
+    if (!itemToDelete) return;
+
+    try {
+      setIsLoading(true);
+
+      const inventoryService = ServiceFactory.getInventoryService();
+      const response = await inventoryService.deleteInventoryItem(itemToDelete.id);
+
+      if (response.success) {
+        showSuccessToast({
+          title: 'Item Deleted',
+          description: `${itemToDelete.name} has been deleted from inventory`
+        });
+
+        // Refresh inventory data
+        await refreshInventoryData();
+      } else {
+        showErrorToast({
+          title: 'Error',
+          description: response.error || 'Failed to delete inventory item'
+        });
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      showErrorToast({
+        title: 'Error',
+        description: errorMessage
+      });
+    } finally {
+      setIsLoading(false);
+      setIsDeleteDialogOpen(false);
+      setItemToDelete(null);
+    }
   };
 
   // Function to refresh inventory data after recording consumption
@@ -129,8 +188,8 @@ export default function InventoryPage() {
     <AppLayout>
       <div className="p-6">
         <div className="container mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Inventory</h1>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mt-0 mt-2 pl-0">
+          <h1 className="text-3xl font-bold mb-4 md:mb-0">Inventory</h1>
           <div className="flex gap-2">
             <Button
               variant="outline"
@@ -150,14 +209,16 @@ export default function InventoryPage() {
                 </>
               )}
             </Button>
-            <Button
-              onClick={() => setIsAddItemModalOpen(true)}
-              className="gap-2"
-              size="sm"
-            >
-              <span className="text-lg">+</span>
-              <span>Add Item</span>
-            </Button>
+            {hasPermission(PERMISSIONS.INVENTORY_CREATE) && (
+              <Button
+                onClick={() => setIsAddItemModalOpen(true)}
+                className="gap-2"
+                size="sm"
+              >
+                <span className="text-lg">+</span>
+                <span>Add Item</span>
+              </Button>
+            )}
           </div>
         </div>
 
@@ -291,16 +352,27 @@ export default function InventoryPage() {
                     <p className="mt-2 text-sm text-gray-500 border-t pt-2 line-clamp-2">{item.description}</p>
                   )}
                 </CardContent>
-                <CardFooter className="mt-auto pt-4">
+                <CardFooter className="mt-auto pt-4 flex gap-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full"
+                    className="flex-1"
                     onClick={() => handleOpenConsumptionModal(item)}
                     disabled={item.current_balance <= 0}
                   >
                     Record Usage
                   </Button>
+
+                  {hasPermission(PERMISSIONS.INVENTORY_DELETE) && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="bg-transparent hover:bg-red-50 text-red-500 hover:text-red-600 border-red-200"
+                      onClick={() => handleOpenDeleteDialog(item)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
                 </CardFooter>
               </Card>
             ))}
@@ -323,6 +395,32 @@ export default function InventoryPage() {
           onClose={() => setIsAddItemModalOpen(false)}
           onSuccess={refreshInventoryData}
         />
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the inventory item
+                <strong className="font-semibold"> {itemToDelete?.name}</strong> and remove it from the system.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleDeleteItem();
+                }}
+                className="bg-red-500 hover:bg-red-600 focus:ring-red-500"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Deleting...' : 'Delete'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         </div>
       </div>
     </AppLayout>

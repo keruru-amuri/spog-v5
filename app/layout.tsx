@@ -6,9 +6,9 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { ToastProvider } from '@/contexts/ToastContext'
 
 export const metadata: Metadata = {
-  title: 'SPOG Inventory Management',
+  title: 'MABES SPOG Inventory Management',
   description: 'Inventory management system for sealant, paint, oil, and grease',
-  generator: 'v0.dev',
+  generator: 'MABES SPOG Inventory',
 }
 
 export default function RootLayout({

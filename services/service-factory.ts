@@ -1,12 +1,14 @@
 import { InventoryService } from './inventory-service';
 import { LocationService } from './location-service';
 import { ConsumptionService } from './consumption-service';
+import { UserService } from './user-service';
 import { ReportServiceClient } from './report-service-client';
 
 // Supabase implementations
 import { InventoryServiceSupabase } from './inventory-service-supabase';
 import { LocationServiceSupabase } from './location-service-supabase';
 import { ConsumptionServiceSupabase } from './consumption-service-supabase';
+import { UserServiceSupabase } from './user-service-supabase';
 
 /**
  * Service factory
@@ -16,6 +18,7 @@ export class ServiceFactory {
   private static inventoryService: InventoryServiceSupabase;
   private static locationService: LocationServiceSupabase;
   private static consumptionService: ConsumptionServiceSupabase;
+  private static userService: UserServiceSupabase;
   private static reportService: ReportServiceClient;
 
   /**
@@ -49,6 +52,17 @@ export class ServiceFactory {
       this.consumptionService = new ConsumptionServiceSupabase();
     }
     return this.consumptionService;
+  }
+
+  /**
+   * Get the user service
+   * @returns User service
+   */
+  static getUserService(): UserServiceSupabase {
+    if (!this.userService) {
+      this.userService = new UserServiceSupabase();
+    }
+    return this.userService;
   }
 
   /**

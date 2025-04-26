@@ -42,9 +42,9 @@ export default function ApiDocs() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h1 className="text-3xl font-bold mb-2">SPOG Inventory Management API Documentation</h1>
+        <h1 className="text-3xl font-bold mb-2">MABES SPOG Inventory Management API Documentation</h1>
         <p className="text-gray-600 mb-4">
-          This documentation provides details about the API endpoints available in the SPOG Inventory Management system.
+          This documentation provides details about the API endpoints available in the MABES SPOG Inventory Management system.
           Use the endpoints below to interact with the system programmatically.
         </p>
         <div className="flex items-center space-x-2 text-sm text-gray-500">

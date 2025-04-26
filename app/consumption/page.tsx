@@ -68,9 +68,9 @@ export default function ConsumptionPage() {
     <AppLayout>
       <div className="p-6">
         <div className="container mx-auto">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mt-0 mt-2 pl-0">
           <div>
-            <h1 className="text-3xl font-bold">Consumption History</h1>
+            <h1 className="text-3xl font-bold mb-2 md:mb-0">Consumption History</h1>
             <p className="text-muted-foreground">Track inventory usage over time</p>
           </div>
         </div>

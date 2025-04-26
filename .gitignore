@@ -31,3 +31,6 @@ next-env.d.ts
 
 # development tools and unused files
 /dev-tools
+
+# project management
+todo.md

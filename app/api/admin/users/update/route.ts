@@ -6,10 +6,12 @@ export async function POST(request: NextRequest) {
   try {
     // Create a Supabase server client (with the service key)
     const supabase = createServerClient();
-    
+
     // Parse the request body
-    const { userId, role, is_active } = await request.json();
-    
+    const { userId, role, is_active, first_name, last_name, department } = await request.json();
+
+    console.log('Update user request:', { userId, role, is_active, first_name, last_name, department });
+
     // Validate required fields
     if (!userId) {
       return NextResponse.json(
@@ -17,19 +19,31 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     // Prepare update data
     const updateData: Record<string, any> = {};
-    
+
     // Only include fields that are provided
     if (role !== undefined) {
       updateData.role = role as UserRole;
     }
-    
+
     if (is_active !== undefined) {
       updateData.is_active = is_active;
     }
-    
+
+    if (first_name !== undefined) {
+      updateData.first_name = first_name;
+    }
+
+    if (last_name !== undefined) {
+      updateData.last_name = last_name;
+    }
+
+    if (department !== undefined) {
+      updateData.department = department;
+    }
+
     // If no fields to update, return error
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json(
@@ -37,7 +51,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     // Update the user
     const { data, error } = await supabase
       .from('users')
@@ -45,14 +59,14 @@ export async function POST(request: NextRequest) {
       .eq('id', userId)
       .select()
       .single();
-    
+
     if (error) {
       return NextResponse.json(
         { error: error.message },
         { status: 500 }
       );
     }
-    
+
     return NextResponse.json({ user: data });
   } catch (error: any) {
     console.error('Error updating user:', error);

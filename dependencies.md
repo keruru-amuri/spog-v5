@@ -136,7 +136,7 @@ Choose one of the following database options:
 | Tool | Purpose |
 |------|---------|
 | GitHub Actions | Continuous integration and deployment |
-| Vercel | Deployment platform (optional) |
+| MABES SPOG Server | Deployment platform |
 | Netlify | Deployment platform (optional) |
 
 ### 5.2 Containerization (Optional)
@@ -211,10 +211,10 @@ Choose one of the following database options:
    ```bash
    # For PostgreSQL with Drizzle
    npx drizzle-kit push
-   
+
    # For MongoDB with Mongoose
    # Database will be set up automatically on first run
-   
+
    # For Supabase
    # Configure Supabase URL and key in .env.local
    ```

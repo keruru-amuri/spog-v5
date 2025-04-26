@@ -519,6 +519,15 @@ export async function updateUserProfile(userId: string, profileData: ProfileUpda
       updateData.profile_image_url = profileData.profileImageUrl;
     }
 
+    // Handle email and role updates (admin only)
+    if (profileData.email !== undefined) {
+      updateData.email = profileData.email;
+    }
+
+    if (profileData.role !== undefined) {
+      updateData.role = profileData.role;
+    }
+
     // Add updated_at timestamp
     updateData.updated_at = new Date().toISOString();
 

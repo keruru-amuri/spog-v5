@@ -228,7 +228,7 @@ export default function DashboardPage() {
                       <Plus className="mr-2 h-4 w-4" />
                       Add Item
                     </Button>
-                    <Link href="/reports">
+                    <Link href="/reports_v1">
                       <Button variant="outline" size="sm" className="w-full justify-start">
                         <BarChart3 className="mr-2 h-4 w-4" />
                         Reports

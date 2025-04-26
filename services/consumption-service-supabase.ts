@@ -33,7 +33,8 @@ export class ConsumptionServiceSupabase {
         .from('consumption_records')
         .select(`
           *,
-          inventory_items(name)
+          inventory_items(name),
+          users(email)
         `);
 
       // Apply filters
@@ -113,7 +114,7 @@ export class ConsumptionServiceSupabase {
         notes: record.notes || undefined,
         recorded_at: record.recorded_at,
         item_name: record.inventory_items?.name,
-        user_name: `User ${record.user_id.substring(0, 8)}` // Simplified user name since we don't have profiles
+        user_name: record.users?.email || `User ${record.user_id.substring(0, 8)}` // Use email if available, otherwise fallback to user ID
       }));
 
       return {
@@ -153,7 +154,8 @@ export class ConsumptionServiceSupabase {
         .from('consumption_records')
         .select(`
           *,
-          inventory_items(name)
+          inventory_items(name),
+          users(email)
         `)
         .eq('id', id)
         .single();
@@ -175,7 +177,7 @@ export class ConsumptionServiceSupabase {
         notes: data.notes || undefined,
         recorded_at: data.recorded_at,
         item_name: data.inventory_items?.name,
-        user_name: `User ${data.user_id.substring(0, 8)}` // Simplified user name since we don't have profiles
+        user_name: data.users?.email || `User ${data.user_id.substring(0, 8)}` // Use email if available, otherwise fallback to user ID
       };
 
       return {
@@ -405,7 +407,8 @@ export class ConsumptionServiceSupabase {
           .from('consumption_records')
           .select(`
             *,
-            inventory_items(name)
+            inventory_items(name),
+            users(email)
           `)
           .eq('id', consumptionId)
           .single();
@@ -426,7 +429,7 @@ export class ConsumptionServiceSupabase {
           notes: createdRecord.notes || undefined,
           recorded_at: createdRecord.recorded_at,
           item_name: createdRecord.inventory_items?.name,
-          user_name: `User ${createdRecord.user_id.substring(0, 8)}` // Simplified user name since we don't have profiles
+          user_name: createdRecord.users?.email || `User ${createdRecord.user_id.substring(0, 8)}` // Use email if available, otherwise fallback to user ID
         };
 
         console.log('Returning new record:', newRecord);

@@ -63,6 +63,8 @@ export interface ProfileUpdateRequest {
   lastName?: string;
   department?: string;
   profileImageUrl?: string;
+  email?: string;
+  role?: UserRole;
 }
 
 // Authentication response types
@@ -124,7 +126,6 @@ export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
     PERMISSIONS.INVENTORY_READ,
     PERMISSIONS.CONSUMPTION_CREATE,
     PERMISSIONS.CONSUMPTION_READ,
-    PERMISSIONS.REPORT_GENERATE,
     PERMISSIONS.LOCATION_READ,
   ],
 };

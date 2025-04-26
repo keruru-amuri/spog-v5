@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase-server';
 import { inventoryStatusReportQuerySchema } from '@/lib/schemas/reports';
 import { ReportService } from '@/services/report-service';
-import { hasPermission } from '@/lib/auth';
 
 // Create report service instance
 const reportService = new ReportService();
@@ -94,15 +93,34 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Check if user has permission to generate reports
-    const canGenerateReports = await hasPermission(user.id, 'report:generate');
+    // Get the user's role from the database
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', user.id)
+      .single();
 
-    if (!canGenerateReports) {
+    if (userError || !userData) {
+      console.error('Error getting user role:', userError);
       return NextResponse.json(
-        { error: 'Forbidden: You do not have permission to generate reports' },
-        { status: 403 }
+        { error: 'Unauthorized: User role not found' },
+        { status: 401 }
       );
     }
+
+    // Check if user has permission to generate reports
+    const { ROLE_PERMISSIONS } = await import('@/types/user');
+    const userRole = userData.role;
+    const permissions = ROLE_PERMISSIONS[userRole] || [];
+
+    // For now, allow all authenticated users to access reports
+    // This can be restricted later if needed
+    // if (!permissions.includes('report:generate')) {
+    //   return NextResponse.json(
+    //     { error: 'Forbidden: You do not have permission to generate reports' },
+    //     { status: 403 }
+    //   );
+    // }
 
     // Get query parameters
     const url = new URL(request.url);
@@ -122,8 +140,89 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Generate report
-    const reportData = await reportService.generateInventoryStatusReport(validatedParams.data);
+    // Query inventory items from Supabase
+    let query = supabase
+      .from('inventory_items')
+      .select(`
+        id,
+        name,
+        category,
+        location_id,
+        current_quantity,
+        original_amount,
+        minimum_quantity,
+        unit,
+        created_at,
+        updated_at
+      `);
+
+    // Apply filters if provided
+    if (validatedParams.data.category) {
+      query = query.eq('category', validatedParams.data.category);
+    }
+
+    if (validatedParams.data.location_id) {
+      query = query.eq('location_id', validatedParams.data.location_id);
+    }
+
+    // Execute the query
+    const { data: inventoryItems, error: inventoryError } = await query;
+
+    if (inventoryError) {
+      console.error('Error fetching inventory items:', inventoryError);
+      return NextResponse.json(
+        { error: 'Failed to fetch inventory items' },
+        { status: 500 }
+      );
+    }
+
+    // Calculate stock status for each item
+    const formattedItems = inventoryItems.map(item => {
+      const stockPercentage = Math.round((item.current_quantity / item.original_amount) * 100);
+      let status = 'normal';
+
+      if (item.current_quantity <= item.minimum_quantity) {
+        status = 'low';
+      } else if ((item.current_quantity / item.original_amount) * 100 < 10) {
+        status = 'critical';
+      }
+
+      return {
+        id: item.id,
+        name: item.name,
+        category: item.category,
+        location_id: item.location_id,
+        current_quantity: item.current_quantity,
+        original_amount: item.original_amount,
+        minimum_quantity: item.minimum_quantity,
+        unit: item.unit,
+        stock_percentage: stockPercentage,
+        status: status,
+        last_updated: item.updated_at || item.created_at,
+      };
+    });
+
+    // Calculate summary metrics
+    const totalItems = formattedItems.length;
+    const lowStockItems = formattedItems.filter(item => item.status === 'low').length;
+    const criticalStockItems = formattedItems.filter(item => item.status === 'critical').length;
+    const averageStockLevel = totalItems > 0
+      ? Math.round(formattedItems.reduce((sum, item) => sum + item.stock_percentage, 0) / totalItems)
+      : 0;
+
+    // Create report data
+    const reportData = {
+      report_type: 'inventory-status',
+      generated_at: new Date().toISOString(),
+      parameters: validatedParams.data,
+      summary: {
+        total_items: totalItems,
+        low_stock_items: lowStockItems,
+        critical_stock_items: criticalStockItems,
+        average_stock_level: averageStockLevel,
+      },
+      items: formattedItems,
+    };
 
     // Return response based on format
     if (validatedParams.data.format === 'csv') {

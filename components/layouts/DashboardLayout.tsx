@@ -60,7 +60,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     },
     {
       name: 'Reports',
-      href: '/reports',
+      href: '/reports_v1',
       icon: FileText,
       permission: 'report:generate'
     },
@@ -104,7 +104,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </SheetTrigger>
         <SheetContent side="left" className="w-64">
           <SheetHeader>
-            <SheetTitle>SPOG Inventory</SheetTitle>
+            <SheetTitle>MABES SPOG Inventory</SheetTitle>
           </SheetHeader>
           <nav className="mt-8 flex flex-col space-y-1">
             {navigation.map((item) => (
@@ -131,7 +131,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="flex flex-col w-64">
           <div className="flex flex-col flex-grow pt-5 pb-4 overflow-y-auto bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
             <div className="flex items-center flex-shrink-0 px-4">
-              <h1 className="text-xl font-bold">SPOG Inventory</h1>
+              <h1 className="text-xl font-bold">MABES SPOG Inventory</h1>
             </div>
             <nav className="mt-8 flex-1 flex flex-col space-y-1 px-2">
               {navigation.map((item) => (

@@ -17,10 +17,11 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { PERMISSIONS } from '@/types/user';
 
 export function SideNav() {
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user, logout, hasPermission } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleSidebar = () => {
@@ -31,34 +32,53 @@ export function SideNav() {
     {
       name: 'Dashboard',
       href: '/dashboard',
-      icon: LayoutDashboard
+      icon: LayoutDashboard,
+      permission: null // Everyone can access dashboard
     },
     {
       name: 'Inventory',
       href: '/inventory',
-      icon: Package
+      icon: Package,
+      permission: PERMISSIONS.INVENTORY_READ
     },
     {
       name: 'Consumption',
       href: '/consumption',
-      icon: ShoppingCart
+      icon: ShoppingCart,
+      permission: PERMISSIONS.CONSUMPTION_READ
     },
     {
       name: 'Reports',
-      href: '/reports',
-      icon: BarChart2
+      href: '/reports_v1',
+      icon: BarChart2,
+      permission: PERMISSIONS.REPORT_GENERATE
     },
     {
       name: 'Users',
       href: '/users',
-      icon: Users
+      icon: Users,
+      permission: PERMISSIONS.USER_READ
     },
     {
       name: 'Settings',
       href: '/settings',
-      icon: Settings
+      icon: Settings,
+      permission: null // Everyone can access settings
     }
   ];
+
+  // Debug user role and permissions
+  console.log('Current user:', user);
+  console.log('User role:', user?.role);
+  console.log('Has USER_READ permission:', hasPermission(PERMISSIONS.USER_READ));
+  console.log('Has REPORT_GENERATE permission:', hasPermission(PERMISSIONS.REPORT_GENERATE));
+
+  // Filter navigation items based on user permissions
+  const filteredNavItems = navItems.filter(item => {
+    const hasAccess = item.permission === null || hasPermission(item.permission);
+    console.log(`Menu item ${item.name} has access:`, hasAccess);
+    return hasAccess;
+  });
 
   return (
     <>
@@ -66,8 +86,9 @@ export function SideNav() {
       <Button
         variant="outline"
         size="icon"
-        className="fixed top-4 left-4 z-50 md:hidden"
+        className="fixed top-4 left-4 z-50 md:hidden shadow-md bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 w-10 h-10 p-0 flex items-center justify-center"
         onClick={toggleSidebar}
+        aria-label={isOpen ? "Close menu" : "Open menu"}
       >
         {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </Button>
@@ -80,14 +101,16 @@ export function SideNav() {
         )}
       >
         <div className="flex flex-col h-full">
-          {/* Logo */}
+          {/* Logo - Hidden on mobile when menu is expanded */}
           <div className="p-4 border-b">
-            <h1 className="text-xl font-bold">SPOG Inventory</h1>
+            <h1 className="text-xl font-bold md:block hidden">MABES SPOG Inventory</h1>
+            {/* Empty space for mobile */}
+            <div className="h-4 md:hidden"></div>
           </div>
 
           {/* Navigation */}
           <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-            {navItems.map((item) => (
+            {filteredNavItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}

@@ -355,6 +355,24 @@ function getPayloadConfigFromPayload(
     : config[key as keyof typeof config]
 }
 
+// Re-export Recharts components
+export const ChartLine = RechartsPrimitive.LineChart;
+export const ChartBars = RechartsPrimitive.BarChart;
+export const ChartArea = RechartsPrimitive.AreaChart;
+export const ChartPie = RechartsPrimitive.PieChart;
+
+// Export chart components
+export const Line = RechartsPrimitive.Line;
+export const Bar = RechartsPrimitive.Bar;
+export const Area = RechartsPrimitive.Area;
+export const Pie = RechartsPrimitive.Pie;
+export const XAxis = RechartsPrimitive.XAxis;
+export const YAxis = RechartsPrimitive.YAxis;
+export const CartesianGrid = RechartsPrimitive.CartesianGrid;
+export const Tooltip = RechartsPrimitive.Tooltip;
+export const Legend = RechartsPrimitive.Legend;
+export const Cell = RechartsPrimitive.Cell;
+
 export {
   ChartContainer,
   ChartTooltip,

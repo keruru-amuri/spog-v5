@@ -1,7 +1,7 @@
 import { createSwaggerSpec } from 'next-swagger-doc';
 
 /**
- * OpenAPI specification for the SPOG Inventory Management API
+ * OpenAPI specification for the MABES SPOG Inventory Management API
  */
 export const getApiDocs = () => {
   const spec = createSwaggerSpec({
@@ -9,9 +9,9 @@ export const getApiDocs = () => {
     definition: {
       openapi: '3.0.0',
       info: {
-        title: 'SPOG Inventory Management API',
+        title: 'MABES SPOG Inventory Management API',
         version: '1.0.0',
-        description: 'API documentation for the SPOG Inventory Management system',
+        description: 'API documentation for the MABES SPOG Inventory Management system',
         contact: {
           name: 'SPOG Support',
           email: 'support@example.com',
@@ -134,7 +134,7 @@ export const getApiDocs = () => {
               },
             },
           },
-          
+
           // Inventory schemas
           InventoryItem: {
             type: 'object',
@@ -332,7 +332,7 @@ export const getApiDocs = () => {
               },
             },
           },
-          
+
           // Consumption schemas
           ConsumptionRecord: {
             type: 'object',
@@ -405,7 +405,7 @@ export const getApiDocs = () => {
               },
             },
           },
-          
+
           // Report schemas
           InventoryStatusReport: {
             type: 'object',
@@ -730,7 +730,7 @@ export const getApiDocs = () => {
               },
             },
           },
-          
+
           // Error schemas
           Error: {
             type: 'object',
@@ -748,6 +748,6 @@ export const getApiDocs = () => {
       },
     },
   });
-  
+
   return spec;
 };

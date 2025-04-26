@@ -10,19 +10,25 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
+
 interface RegisterFormProps {
   onSuccess?: () => void;
 }
 
 export function RegisterForm({ onSuccess }: RegisterFormProps) {
   const [serverError, setServerError] = useState<string | null>(null);
-  
+
   const { register: registerUser, isLoading } = useAuth();
-  
+
+  // Predefined departments (excluding Administration)
+  const departments = ['Operations', 'Maintenance', 'Warehouse', 'Line Maintenance'];
+
   const {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
+    setValue,
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -34,16 +40,16 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
       confirmPassword: '',
     },
   });
-  
+
   const onSubmit = async (data: RegisterFormValues) => {
     setServerError(null);
-    
+
     try {
       // Remove confirmPassword before sending to API
       const { confirmPassword, ...registrationData } = data;
-      
+
       const result = await registerUser(registrationData);
-      
+
       if ('error' in result) {
         // Error is already handled in the auth context
         console.error('Registration failed:', result.error);
@@ -55,7 +61,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
       setServerError('An unexpected error occurred. Please try again.');
     }
   };
-  
+
   return (
     <div className="space-y-6">
       {serverError && (
@@ -63,7 +69,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
           <AlertDescription>{serverError}</AlertDescription>
         </Alert>
       )}
-      
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
@@ -78,7 +84,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
               <p className="text-sm text-red-500">{errors.firstName.message}</p>
             )}
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="lastName">Last Name</Label>
             <Input
@@ -92,7 +98,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
             )}
           </div>
         </div>
-        
+
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
@@ -106,20 +112,26 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
             <p className="text-sm text-red-500">{errors.email.message}</p>
           )}
         </div>
-        
+
         <div className="space-y-2">
           <Label htmlFor="department">Department (Optional)</Label>
-          <Input
+          <select
             id="department"
-            placeholder="Your department"
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             {...register('department')}
-            aria-invalid={errors.department ? 'true' : 'false'}
-          />
+          >
+            <option value="">Select your department</option>
+            {departments.map((department) => (
+              <option key={department} value={department}>
+                {department}
+              </option>
+            ))}
+          </select>
           {errors.department && (
             <p className="text-sm text-red-500">{errors.department.message}</p>
           )}
         </div>
-        
+
         <div className="space-y-2">
           <Label htmlFor="password">Password</Label>
           <Input
@@ -133,7 +145,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
             <p className="text-sm text-red-500">{errors.password.message}</p>
           )}
         </div>
-        
+
         <div className="space-y-2">
           <Label htmlFor="confirmPassword">Confirm Password</Label>
           <Input
@@ -147,7 +159,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
             <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
           )}
         </div>
-        
+
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? 'Creating Account...' : 'Create Account'}
         </Button>

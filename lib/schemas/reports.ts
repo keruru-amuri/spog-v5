@@ -6,11 +6,9 @@ import { z } from 'zod';
 const baseReportQuerySchema = z.object({
   start_date: z
     .string()
-    .datetime({ message: 'Start date must be a valid ISO date string' })
     .optional(),
   end_date: z
     .string()
-    .datetime({ message: 'End date must be a valid ISO date string' })
     .optional(),
   format: z
     .enum(['json', 'csv'])
