@@ -20,7 +20,9 @@
     "migrate:up": "node --require ts-node/register scripts/migrate.js up",
     "migrate:down": "node --require ts-node/register scripts/migrate.js down",
     "migrate:status": "node --require ts-node/register scripts/migrate.js status",
-    "migrate:create": "node --require ts-node/register scripts/migrate.js create"
+    "migrate:create": "node --require ts-node/register scripts/migrate.js create",
+    "azure-build": "next build",
+    "azure-start": "next start -p $PORT"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
