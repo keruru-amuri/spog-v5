@@ -1,8 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import SwaggerUI from 'swagger-ui-react';
+import dynamic from 'next/dynamic';
 import 'swagger-ui-react/swagger-ui.css';
+
+// Dynamically import SwaggerUI to avoid SSR issues
+const SwaggerUI = dynamic(() => import('swagger-ui-react'), { ssr: false });
 
 /**
  * API Documentation page
@@ -10,8 +13,11 @@ import 'swagger-ui-react/swagger-ui.css';
  */
 export default function ApiDocs() {
   const [spec, setSpec] = useState<any>(null);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
+
     // Fetch the OpenAPI specification
     fetch('/api/api-docs')
       .then((response) => response.json())
@@ -35,7 +41,9 @@ export default function ApiDocs() {
     document.head.appendChild(style);
 
     return () => {
-      document.head.removeChild(style);
+      if (document.head.contains(style)) {
+        document.head.removeChild(style);
+      }
     };
   }, []);
 
@@ -53,7 +61,7 @@ export default function ApiDocs() {
         </div>
       </div>
 
-      {spec ? (
+      {isClient && spec ? (
         <div className="bg-white rounded-lg shadow-md p-6">
           <SwaggerUI
             spec={spec}
