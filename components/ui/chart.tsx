@@ -372,6 +372,7 @@ export const CartesianGrid = RechartsPrimitive.CartesianGrid;
 export const Tooltip = RechartsPrimitive.Tooltip;
 export const Legend = RechartsPrimitive.Legend;
 export const Cell = RechartsPrimitive.Cell;
+export const LabelList = RechartsPrimitive.LabelList;
 
 export {
   ChartContainer,
