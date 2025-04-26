@@ -24,8 +24,7 @@ const nextConfig = {
     optimizeCss: true,
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
   },
-  // Font optimization
-  fontOptimization: true,
+  // Font optimization is handled by Next.js automatically
 }
 
 export default nextConfig

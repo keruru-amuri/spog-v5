@@ -2,16 +2,34 @@ import { BaseRepository, QueryOptions } from './base-repository';
 import { connectionManager } from '../lib/supabase';
 import { fetchById, fetchMany, insert, update, remove } from '../lib/db-utils';
 import { Database } from '../types/supabase';
-// Import bcrypt dynamically to avoid build issues
-let bcrypt: any = null;
+// Import bcrypt with fallback for environments where native modules can't be loaded
+import * as bcryptFallback from '../lib/bcrypt-fallback';
 
-// Only import bcrypt in a non-edge runtime environment
-if (typeof window === 'undefined' && process.env.NEXT_RUNTIME !== 'edge') {
-  import('bcrypt').then((module) => {
-    bcrypt = module.default;
-  }).catch((err) => {
-    console.error('Failed to load bcrypt:', err);
-  });
+// Use a type that matches both real bcrypt and our fallback
+interface BcryptLike {
+  hash: (data: string, saltOrRounds: number) => Promise<string>;
+  compare: (data: string, encrypted: string) => Promise<boolean>;
+}
+
+// Default to fallback implementation
+let bcrypt: BcryptLike = bcryptFallback;
+
+// Try to load real bcrypt in Node.js environment (not during build)
+if (typeof window === 'undefined' && process.env.NODE_ENV === 'production' && process.env.NEXT_RUNTIME !== 'edge') {
+  try {
+    // This is a dynamic import that will be excluded during build
+    const dynamicImport = new Function('modulePath', 'return import(modulePath)');
+    dynamicImport('bcrypt')
+      .then((module) => {
+        bcrypt = module.default;
+        console.log('Using real bcrypt');
+      })
+      .catch((err) => {
+        console.warn('Using fallback bcrypt implementation (not secure for production)', err);
+      });
+  } catch (err) {
+    console.warn('Using fallback bcrypt implementation (not secure for production)', err);
+  }
 }
 
 // Type aliases for better readability
@@ -66,13 +84,9 @@ export class UserRepository implements BaseRepository<User, UserInsert, UserUpda
    * @returns Promise resolving to the created user
    */
   async create(data: UserInsert): Promise<User> {
-    // Hash the password if provided and bcrypt is available
-    if (data.password_hash && bcrypt) {
+    // Hash the password if provided
+    if (data.password_hash) {
       data.password_hash = await bcrypt.hash(data.password_hash, this.saltRounds);
-    } else if (data.password_hash) {
-      console.warn('Bcrypt not available, using plaintext password (not recommended)');
-      // In production, you should never store plaintext passwords
-      // This is just a fallback for build/deployment environments
     }
 
     const result = await insert<User, UserInsert>(this.tableName, data);
@@ -91,13 +105,9 @@ export class UserRepository implements BaseRepository<User, UserInsert, UserUpda
    * @returns Promise resolving to the updated user
    */
   async update(id: string, data: UserUpdate): Promise<User> {
-    // Hash the password if provided and bcrypt is available
-    if (data.password_hash && bcrypt) {
+    // Hash the password if provided
+    if (data.password_hash) {
       data.password_hash = await bcrypt.hash(data.password_hash, this.saltRounds);
-    } else if (data.password_hash) {
-      console.warn('Bcrypt not available, using plaintext password (not recommended)');
-      // In production, you should never store plaintext passwords
-      // This is just a fallback for build/deployment environments
     }
 
     const result = await update<User, UserUpdate>(this.tableName, id, data);
@@ -212,17 +222,10 @@ export class UserRepository implements BaseRepository<User, UserInsert, UserUpda
         return null;
       }
 
-      // Check if bcrypt is available
-      if (!bcrypt) {
-        console.warn('Bcrypt not available, skipping password validation');
-        // In a real production environment, you should never skip password validation
-        // This is just a fallback for build/deployment environments
-      } else {
-        const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+      const isPasswordValid = await bcrypt.compare(password, user.password_hash);
 
-        if (!isPasswordValid) {
-          return null;
-        }
+      if (!isPasswordValid) {
+        return null;
       }
 
       // Update last login
@@ -293,15 +296,8 @@ export class UserRepository implements BaseRepository<User, UserInsert, UserUpda
 
         const user = data as User;
 
-        // Hash the new password if bcrypt is available
-        let passwordHash = newPassword;
-        if (bcrypt) {
-          passwordHash = await bcrypt.hash(newPassword, this.saltRounds);
-        } else {
-          console.warn('Bcrypt not available, using plaintext password (not recommended)');
-          // In production, you should never store plaintext passwords
-          // This is just a fallback for build/deployment environments
-        }
+        // Hash the new password
+        const passwordHash = await bcrypt.hash(newPassword, this.saltRounds);
 
         // Update the user with the new password and clear the reset token
         await this.update(user.id, {
