@@ -34,3 +34,7 @@ next-env.d.ts
 
 # project management
 todo.md
+
+# error logs
+.errorlog/
+@.errorlog/
