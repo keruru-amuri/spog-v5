@@ -31,36 +31,45 @@ try {
   } catch (standaloneError) {
     console.error('Failed to load Next.js from standalone path:', standaloneError);
 
-    // As a last resort, create a simple HTTP server
-    console.log('Creating a simple HTTP server as fallback');
-    const server = createServer((req, res) => {
-      res.writeHead(200, { 'Content-Type': 'text/html' });
-      res.end(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>SPOG Inventory</title>
-            <style>
-              body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
-              h1 { color: #0070f3; }
-              p { margin-bottom: 20px; }
-            </style>
-          </head>
-          <body>
-            <h1>SPOG Inventory</h1>
-            <p>The application is starting up. Please try again in a few minutes.</p>
-            <p>If the problem persists, please contact the administrator.</p>
-            <p>Error: ${error.message}</p>
-          </body>
-        </html>
-      `);
-    });
+    try {
+      // Try to find next in the parent directory
+      const parentPath = join(process.cwd(), '../node_modules/next');
+      next = require(parentPath);
+      console.log(`Successfully loaded Next.js from ${parentPath}`);
+    } catch (parentError) {
+      console.error('Failed to load Next.js from parent path:', parentError);
 
-    server.listen(port, () => {
-      console.log(`> Fallback server ready on http://${hostname}:${port}`);
-    });
+      // As a last resort, create a simple HTTP server
+      console.log('Creating a simple HTTP server as fallback');
+      const server = createServer((req, res) => {
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.end(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>MABES SPOG Inventory</title>
+              <style>
+                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+                h1 { color: #0070f3; }
+                p { margin-bottom: 20px; }
+              </style>
+            </head>
+            <body>
+              <h1>MABES SPOG Inventory</h1>
+              <p>The application is starting up. Please try again in a few minutes.</p>
+              <p>If the problem persists, please contact the administrator.</p>
+              <p>Error: ${error.message}</p>
+            </body>
+          </html>
+        `);
+      });
 
-    return; // Exit the script here
+      server.listen(port, () => {
+        console.log(`> Fallback server ready on http://${hostname}:${port}`);
+      });
+
+      return; // Exit the script here
+    }
   }
 }
 

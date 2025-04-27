@@ -16,6 +16,16 @@ console.log(`Directory contents: ${fs.readdirSync('.').join(', ')}`);
 if (!fs.existsSync(path.join(process.cwd(), '.next/BUILD_ID'))) {
   console.log('No production build found, building the application...');
   try {
+    // First, try to fix the Next.js module issue
+    console.log('Reinstalling Next.js to fix module issues...');
+    try {
+      execSync('npm install next@latest', { stdio: 'inherit' });
+      console.log('Next.js reinstalled successfully');
+    } catch (installError) {
+      console.error('Failed to reinstall Next.js:', installError);
+      // Continue anyway, the build might still work
+    }
+
     console.log('Running npm run build...');
     execSync('npm run build', { stdio: 'inherit' });
     console.log('Build completed successfully');
