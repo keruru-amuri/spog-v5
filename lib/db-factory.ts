@@ -13,8 +13,10 @@ export class DbFactory {
    */
   static getDbClient() {
     if (DB_CONFIG.dbProvider === 'supabase') {
+      console.log('Using Supabase database provider');
       return supabase;
     } else if (DB_CONFIG.dbProvider === 'azure') {
+      console.log('Using Azure PostgreSQL database provider');
       return azureDb;
     } else {
       throw new Error(`Invalid database provider: ${DB_CONFIG.dbProvider}`);

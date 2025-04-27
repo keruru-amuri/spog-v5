@@ -25,15 +25,25 @@ export class AzureDbClient {
    */
   private constructor() {
     this.pool = new Pool({
-      host: process.env.POSTGRES_HOST || '',
-      port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
-      database: process.env.POSTGRES_DB || 'postgres',
-      user: process.env.POSTGRES_USER || '',
-      password: process.env.POSTGRES_PASSWORD || '',
-      ssl: true,
+      host: DB_CONFIG.postgresHost,
+      port: DB_CONFIG.postgresPort,
+      database: DB_CONFIG.postgresDb,
+      user: DB_CONFIG.postgresUser,
+      password: DB_CONFIG.postgresPassword,
+      ssl: {
+        rejectUnauthorized: false // Required for Azure PostgreSQL
+      },
       max: DB_CONFIG.poolSize,
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: DB_CONFIG.connectionTimeout,
+    });
+
+    console.log('Azure PostgreSQL connection configured with:', {
+      host: DB_CONFIG.postgresHost,
+      port: DB_CONFIG.postgresPort,
+      database: DB_CONFIG.postgresDb,
+      user: DB_CONFIG.postgresUser,
+      ssl: true
     });
 
     // Handle pool errors
@@ -104,11 +114,11 @@ export class AzureDbClient {
       } catch (error) {
         retries++;
         console.error(`Error connecting to database (attempt ${retries}/${maxRetries}):`, error);
-        
+
         if (retries >= maxRetries) {
           throw error;
         }
-        
+
         // Wait before retrying
         await new Promise(resolve => setTimeout(resolve, retryInterval));
       }
