@@ -12,6 +12,18 @@ echo "Current directory: $(pwd)"
 echo "Directory contents:"
 ls -la
 
-# Start the standalone server
-echo "Starting the standalone server..."
-node standalone-server.js
+# Check if we need to build the application
+if [ ! -d ".next" ]; then
+  echo "Building the application using azure-build.js..."
+  node azure-build.js
+fi
+
+# Try to start with the Azure server first
+echo "Starting the application with Azure server..."
+if [ -f "azure-server.js" ]; then
+  node azure-server.js
+else
+  # Fall back to standalone server
+  echo "Azure server not found, using standalone server..."
+  node standalone-server.js
+fi

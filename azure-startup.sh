@@ -20,8 +20,8 @@ fi
 
 # Check if we need to build the application
 if [ ! -d ".next" ]; then
-  echo "Building the application..."
-  npm run build
+  echo "Building the application using azure-build.js..."
+  node azure-build.js
 fi
 
 # Try to start with the standalone server first
