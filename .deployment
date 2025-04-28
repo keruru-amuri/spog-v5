@@ -1,4 +1,4 @@
 [config]
 SCM_DO_BUILD_DURING_DEPLOYMENT=true
-WEBSITE_NODE_DEFAULT_VERSION=~22
-command=bash azure-startup.sh
+WEBSITE_NODE_DEFAULT_VERSION=~18
+command=bash azure-simple-startup.sh

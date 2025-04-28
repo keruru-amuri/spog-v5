@@ -24,6 +24,12 @@ if [ ! -d ".next" ]; then
   npm run build
 fi
 
-# Start the application using our custom server
-echo "Starting the application with custom server..."
-node app.js
+# Try to start with the standalone server first
+echo "Starting the application with standalone server..."
+if [ -f "standalone-server.js" ]; then
+  node standalone-server.js
+else
+  # Fall back to the regular server if standalone doesn't exist
+  echo "Standalone server not found, using regular server..."
+  node server.js
+fi

@@ -39,36 +39,45 @@ try {
     } catch (parentError) {
       console.error('Failed to load Next.js from parent path:', parentError);
 
-      // As a last resort, create a simple HTTP server
-      console.log('Creating a simple HTTP server as fallback');
-      const server = createServer((req, res) => {
-        res.writeHead(200, { 'Content-Type': 'text/html' });
-        res.end(`
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <title>MABES SPOG Inventory</title>
-              <style>
-                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
-                h1 { color: #0070f3; }
-                p { margin-bottom: 20px; }
-              </style>
-            </head>
-            <body>
-              <h1>MABES SPOG Inventory</h1>
-              <p>The application is starting up. Please try again in a few minutes.</p>
-              <p>If the problem persists, please contact the administrator.</p>
-              <p>Error: ${error.message}</p>
-            </body>
-          </html>
-        `);
-      });
+      // As a last resort, use our standalone server
+      console.log('Loading standalone server as fallback');
+      try {
+        require('./standalone-server.js');
+        return; // Exit the script here if standalone server loads successfully
+      } catch (standaloneError) {
+        console.error('Failed to load standalone server:', standaloneError);
 
-      server.listen(port, () => {
-        console.log(`> Fallback server ready on http://${hostname}:${port}`);
-      });
+        // If standalone server fails, create a simple HTTP server
+        console.log('Creating a simple HTTP server as final fallback');
+        const server = createServer((req, res) => {
+          res.writeHead(200, { 'Content-Type': 'text/html' });
+          res.end(`
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <title>MABES SPOG Inventory</title>
+                <style>
+                  body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+                  h1 { color: #0070f3; }
+                  p { margin-bottom: 20px; }
+                </style>
+              </head>
+              <body>
+                <h1>MABES SPOG Inventory</h1>
+                <p>The application is starting up. Please try again in a few minutes.</p>
+                <p>If the problem persists, please contact the administrator.</p>
+                <p>Error: ${error.message}</p>
+              </body>
+            </html>
+          `);
+        });
 
-      return; // Exit the script here
+        server.listen(port, () => {
+          console.log(`> Fallback server ready on http://${hostname}:${port}`);
+        });
+
+        return; // Exit the script here
+      }
     }
   }
 }
@@ -109,32 +118,40 @@ app.prepare().then(() => {
 }).catch(err => {
   console.error('Error preparing Next.js app:', err);
 
-  // Create a fallback server if Next.js fails to start
-  const server = createServer((req, res) => {
-    res.writeHead(200, { 'Content-Type': 'text/html' });
-    res.end(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>SPOG Inventory</title>
-          <style>
-            body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
-            h1 { color: #0070f3; }
-            p { margin-bottom: 20px; }
-            pre { background: #f0f0f0; padding: 10px; border-radius: 5px; text-align: left; overflow: auto; }
-          </style>
-        </head>
-        <body>
-          <h1>SPOG Inventory</h1>
-          <p>The application encountered an error during startup.</p>
-          <p>Please try again in a few minutes or contact the administrator.</p>
-          <pre>${err.stack || err.message}</pre>
-        </body>
-      </html>
-    `);
-  });
+  // Try to use our standalone server if Next.js fails to start
+  try {
+    console.log('Loading standalone server as fallback after Next.js failure');
+    require('./standalone-server.js');
+  } catch (standaloneError) {
+    console.error('Failed to load standalone server:', standaloneError);
 
-  server.listen(port, () => {
-    console.log(`> Error fallback server ready on http://${hostname}:${port}`);
-  });
+    // Create a fallback server if both Next.js and standalone server fail
+    const server = createServer((req, res) => {
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.end(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>MABES SPOG Inventory</title>
+            <style>
+              body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+              h1 { color: #0070f3; }
+              p { margin-bottom: 20px; }
+              pre { background: #f0f0f0; padding: 10px; border-radius: 5px; text-align: left; overflow: auto; }
+            </style>
+          </head>
+          <body>
+            <h1>MABES SPOG Inventory</h1>
+            <p>The application encountered an error during startup.</p>
+            <p>Please try again in a few minutes or contact the administrator.</p>
+            <pre>${err.stack || err.message}</pre>
+          </body>
+        </html>
+      `);
+    });
+
+    server.listen(port, () => {
+      console.log(`> Error fallback server ready on http://${hostname}:${port}`);
+    });
+  }
 });
